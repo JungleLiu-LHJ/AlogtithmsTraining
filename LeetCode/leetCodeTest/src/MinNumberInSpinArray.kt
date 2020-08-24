@@ -84,8 +84,56 @@ fun mergeTwoLists(l1: ListNode?, l2: ListNode?): ListNode? {
 }
 
 /**
- * 数组中第K大的数字
+ * 215. 数组中的第K个最大元素
  */
-//fun findKthLargest(nums: IntArray, k: Int): Int {
-//
-//}
+fun siftDown(h: IntArray, start: Int = 0, num: Int = 0) {
+    val l = h.size - num
+    var parent = start
+    while (l > (parent * 2 + 1)) {
+        if (parent * 2 + 2 == l) {
+            if (h[parent] < h[parent * 2 + 1]) {
+                val temp = h[parent]
+                h[parent] = h[parent * 2 + 1]
+                h[parent * 2 + 1] = temp
+            }
+        } else if (h[parent] < h[parent * 2 + 1] || h[parent] < h[parent * 2 + 2]) {
+            when (h[parent * 2 + 1] >= h[parent * 2 + 2]) {
+                true -> {
+                    val temp = h[parent]
+                    h[parent] = h[parent * 2 + 1]
+                    h[parent * 2 + 1] = temp
+                }
+                false -> {
+                    val temp = h[parent]
+                    h[parent] = h[parent * 2 + 2]
+                    h[parent * 2 + 2] = temp
+                }
+            }
+        }
+        parent += 1
+    }
+}
+
+fun makeHeap(h: IntArray) {
+    val l = h.size / 2
+    for (index in l downTo 0) {
+        siftDown(h, start = index)
+    }
+    println("makeHeap finished")
+}
+
+fun findKthLargest(nums: IntArray, k: Int): Int {
+    makeHeap(nums)
+    val l = nums.size
+    for(index in 1 .. k){
+        siftDown(nums,0,index)
+        val temp = nums[l - index]
+        nums[l - index ] = nums[0]
+        nums[0] = temp
+    }
+    return nums[l-k ]
+}
+fun main() {
+    val a = intArrayOf(3,2,3,1,2,4,5,5,6)
+    println(findKthLargest(a, 4))
+}
