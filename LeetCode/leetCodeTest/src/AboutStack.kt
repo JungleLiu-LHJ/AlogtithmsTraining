@@ -32,14 +32,49 @@ fun isValid(s: String): Boolean {
  * 42. 接雨水
  * 给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水
  */
+/**
+ * 暴力解法：左右扫描两次，得到两个高的位置
+ */
 fun trap(height: IntArray): Int {
     var left = 0
     var right = 0
+    var capacity = 0
+    val l = height.size
     val stack = Stack<Int>()
+    val water = IntArray(l)
     height.indices.forEach {
-        if(left)
+        if(left <= height[it]) {
+            while(!stack.isEmpty()) {
+                water[stack.pop()] = left
+            }
+            left = height[it]
+        } else {
+            stack.push(it)
+        }
     }
-
+    for(it in l-1 downTo 0){
+        if(right <= height[it]) {
+            while(!stack.isEmpty()) {
+                water[stack.pop()] = right
+            }
+            right = height[it]
+        } else {
+            stack.push(it)
+        }
+    }
+    water.indices.forEach {
+        print("${water[it]} ,")
+       if(water[it]>height[it]) capacity = capacity + water[it]-height[it]
+    }
+    return capacity
 }
 
 
+
+
+
+
+fun main() {
+    var a = intArrayOf(0,1,0,2,1,0,1,3,2,1,2,1)
+    println(trap(a))
+}
