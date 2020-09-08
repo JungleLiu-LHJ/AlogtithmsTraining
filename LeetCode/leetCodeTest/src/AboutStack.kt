@@ -69,12 +69,53 @@ fun trap(height: IntArray): Int {
     return capacity
 }
 
+/**
+ * 动态
+ */
+fun trap2(height: IntArray): Int {
+    var capacity = 0
+    val l = height.size
+    val left = IntArray(l)
+    val right = IntArray(l)
+    var leftMax = 0
+    var rightMax = 0
+    height.indices.forEach {
+        if(height[it] >= leftMax) {
+            leftMax = height[it]
+            left[it] = height[it]
+        } else {
+            left[it] = leftMax
+        }
+        if(height[l - 1 - it] >= rightMax) {
+            rightMax = height[l - 1 - it]
+            right[l - 1 - it] = height[l - 1 - it]
+        } else {
+            right[l - 1 - it] = rightMax
+        }
+    }
+    right.indices.forEach {
+        if(right[it]<left[it]) left[it] = right[it]
+        capacity += left[it] - height[it]
+    }
+    return capacity
+}
 
-
-
+/**
+ * 用栈解决
+ */
+fun trap_stack(height: IntArray): Int {
+    var left = 0
+    val stack = Stack<Int>()
+    height.indices.forEach{
+        if(height[it]>left) {
+            left = height[it]
+            while ()
+        }
+    }
+}
 
 
 fun main() {
     var a = intArrayOf(0,1,0,2,1,0,1,3,2,1,2,1)
-    println(trap(a))
+    println(trap2(a))
 }
