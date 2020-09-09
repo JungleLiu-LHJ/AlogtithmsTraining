@@ -11,7 +11,7 @@ import java.util.*
 
 fun isValid(s: String): Boolean {
     val charArray = s.toCharArray()
-    if(charArray.size%2>0) return false
+    if (charArray.size % 2 > 0) return false
     val stack = Stack<Char>()
     charArray.forEach {
         when (it) {
@@ -43,8 +43,8 @@ fun trap(height: IntArray): Int {
     val stack = Stack<Int>()
     val water = IntArray(l)
     height.indices.forEach {
-        if(left <= height[it]) {
-            while(!stack.isEmpty()) {
+        if (left <= height[it]) {
+            while (!stack.isEmpty()) {
                 water[stack.pop()] = left
             }
             left = height[it]
@@ -52,9 +52,9 @@ fun trap(height: IntArray): Int {
             stack.push(it)
         }
     }
-    for(it in l-1 downTo 0){
-        if(right <= height[it]) {
-            while(!stack.isEmpty()) {
+    for (it in l - 1 downTo 0) {
+        if (right <= height[it]) {
+            while (!stack.isEmpty()) {
                 water[stack.pop()] = right
             }
             right = height[it]
@@ -64,13 +64,13 @@ fun trap(height: IntArray): Int {
     }
     water.indices.forEach {
         print("${water[it]} ,")
-       if(water[it]>height[it]) capacity = capacity + water[it]-height[it]
+        if (water[it] > height[it]) capacity = capacity + water[it] - height[it]
     }
     return capacity
 }
 
 /**
- * 动态
+ * 动态 时间O(n) 空间O(n)
  */
 fun trap2(height: IntArray): Int {
     var capacity = 0
@@ -80,13 +80,13 @@ fun trap2(height: IntArray): Int {
     var leftMax = 0
     var rightMax = 0
     height.indices.forEach {
-        if(height[it] >= leftMax) {
+        if (height[it] >= leftMax) {
             leftMax = height[it]
             left[it] = height[it]
         } else {
             left[it] = leftMax
         }
-        if(height[l - 1 - it] >= rightMax) {
+        if (height[l - 1 - it] >= rightMax) {
             rightMax = height[l - 1 - it]
             right[l - 1 - it] = height[l - 1 - it]
         } else {
@@ -94,7 +94,7 @@ fun trap2(height: IntArray): Int {
         }
     }
     right.indices.forEach {
-        if(right[it]<left[it]) left[it] = right[it]
+        if (right[it] < left[it]) left[it] = right[it]
         capacity += left[it] - height[it]
     }
     return capacity
@@ -106,16 +106,90 @@ fun trap2(height: IntArray): Int {
 fun trap_stack(height: IntArray): Int {
     var left = 0
     val stack = Stack<Int>()
-    height.indices.forEach{
-        if(height[it]>left) {
+    height.indices.forEach {
+        if (height[it] > left) {
             left = height[it]
-            while ()
         }
     }
+    return 0
+}
+
+/**
+ * 接水-双指针 时间O(n) 空间O(1)
+ */
+fun trap_points(height: IntArray): Int {
+    var left = 0
+    var right = height.size - 1
+    var deep = 0
+    var capacity = 0
+    while (left < right) {
+        if (height[left] < height[right]) {
+            deep = if (height[left] > deep) height[left] else deep
+            capacity += deep - height[left]
+            left += 1
+        } else {
+            deep = if (height[right] > deep) height[right] else deep
+            capacity += deep - height[right]
+            right -= 1
+        }
+    }
+    return capacity
+}
+
+
+/**
+ * 71. 简化路径
+ * 以 Unix 风格给出一个文件的绝对路径，你需要简化它。或者换句话说，将其转换为规范路径。
+在 Unix 风格的文件系统中，一个点（.）表示当前目录本身；此外，两个点 （..） 表示将目录切换到上一级（指向父目录）；两者都可以是复杂相对路径的组成部分。更多信息请参阅：Linux / Unix中的绝对路径 vs 相对路径
+请注意，返回的规范路径必须始终以斜杠 / 开头，并且两个目录名之间必须只有一个斜杠 /。最后一个目录名（如果存在）不能以 / 结尾。此外，规范路径必须是表示绝对路径的最短字符串。
+ */
+
+fun simplifyPath(path: String): String {
+    val pathArray = path.toCharArray()
+    val a = StringBuilder()
+    val stack = Stack<Char>()
+    pathArray.forEach {
+        if (it == '/') {
+            if (a.isEmpty()) {
+                if (stack.isEmpty() || stack.peek() != '/') {
+                    stack.push(it)
+                }
+            } else {
+                when (a.toString()) {
+                    "." -> {
+                    }
+                    ".." -> {
+                        stack.pop()
+                        while (stack.isNotEmpty() && stack.peek() != '/') {
+                            stack.pop()
+                        }
+                    }
+                    else -> {
+                        a.append(it)
+                        a.toString().toCharArray().forEach { item ->
+                            stack.push(item)
+                        }
+                    }
+                }
+                a.clear()
+            }
+
+        } else {
+            a.append(it)
+        }
+    }
+    a.clear()
+    if (stack.isEmpty()) {
+        a.append('/')
+    }
+
+    while (stack.isNotEmpty()) {
+        a.append(stack.pop())
+    }
+    return a.reverse().toString()
 }
 
 
 fun main() {
-    var a = intArrayOf(0,1,0,2,1,0,1,3,2,1,2,1)
-    println(trap2(a))
+    println(simplifyPath("/a/../../b/../c//.//"))
 }
