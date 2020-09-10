@@ -1,4 +1,5 @@
 import java.util.*
+import kotlin.math.min
 
 /**
  * 20. 有效的括号
@@ -104,14 +105,19 @@ fun trap2(height: IntArray): Int {
  * 用栈解决
  */
 fun trap_stack(height: IntArray): Int {
-    var left = 0
     val stack = Stack<Int>()
-    height.indices.forEach {
-        if (height[it] > left) {
-            left = height[it]
+    var capacity = 0
+    height.indices.forEach { index ->
+        while (stack.isNotEmpty() && height[index] > height[stack.peek()]) {
+            val first = stack.pop()
+            if (stack.isEmpty()) break
+            val distance = index - stack.peek() - 1
+            val deep = min(height[index], height[stack.peek()]) - height[first]
+            capacity += deep * distance
         }
+        stack.push(index)
     }
-    return 0
+    return capacity
 }
 
 /**
@@ -148,37 +154,45 @@ fun simplifyPath(path: String): String {
     val pathArray = path.toCharArray()
     val a = StringBuilder()
     val stack = Stack<Char>()
-    pathArray.forEach {
-        if (it == '/') {
+    pathArray.indices.forEach {
+        if (pathArray[it] == '/' || it== pathArray.size - 1) {
+            if(pathArray[it] != '/' ) a.append(pathArray[it])
             if (a.isEmpty()) {
                 if (stack.isEmpty() || stack.peek() != '/') {
-                    stack.push(it)
+                        stack.push(pathArray[it])
                 }
             } else {
-                when (a.toString()) {
-                    "." -> {
-                    }
-                    ".." -> {
-                        stack.pop()
-                        while (stack.isNotEmpty() && stack.peek() != '/') {
+                    when (a.toString()) {
+                        "." -> {
+                        }
+                        ".." -> {
                             stack.pop()
+                            if (stack.isEmpty() ) {
+                                stack.push('/')
+                            }
+                            while (stack.isNotEmpty() && stack.peek() != '/') {
+                                stack.pop()
+                            }
+
+                        }
+                        else -> {
+                            a.append(pathArray[it])
+                            a.toString().toCharArray().forEach { item ->
+                                stack.push(item)
+                            }
                         }
                     }
-                    else -> {
-                        a.append(it)
-                        a.toString().toCharArray().forEach { item ->
-                            stack.push(item)
-                        }
-                    }
-                }
-                a.clear()
+                    a.clear()
+
+
             }
 
         } else {
-            a.append(it)
+            a.append(pathArray[it])
         }
     }
     a.clear()
+    if(stack.isNotEmpty())stack.pop()
     if (stack.isEmpty()) {
         a.append('/')
     }
@@ -192,4 +206,6 @@ fun simplifyPath(path: String): String {
 
 fun main() {
     println(simplifyPath("/a/../../b/../c//.//"))
+    println(simplifyPath("/a//b////c/d//././/.."))
+
 }
