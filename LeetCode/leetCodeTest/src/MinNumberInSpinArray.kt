@@ -133,6 +133,10 @@ fun findKthLargest(nums: IntArray, k: Int): Int {
     }
     return nums[l-k ]
 }
+
+
+
+
 fun main() {
     val a = intArrayOf(3,2,3,1,2,4,5,5,6)
     println(findKthLargest(a, 4))
