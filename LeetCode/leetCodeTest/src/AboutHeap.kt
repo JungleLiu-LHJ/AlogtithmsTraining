@@ -72,9 +72,46 @@ fun topKFrequent(nums: IntArray, k: Int): IntArray {
             map[num] = 1
         }
     }
+    val l = map.size
+    val times = IntArray(l)
+    var i = 0
+    map.forEach {
+        times[i] = it.value
+        i++
+    }
+
+    makeHeap(times)
+    for (index in 1..k) {
+        if (index > (l - 2)) break
+        siftDown(nums, 0, index)
+        val temp = times[l - index]
+        times[l - index] = times[0]
+        times[0] = temp
+    }
+
+    val out = hashSetOf<Int>()
+    i = k
+    for (index in 1..k) {
+        map.forEach { item ->
+            println("${l - index} : ${times[l - index]} and ${item.value}")
+            if (times[l - index] == item.value) {
+
+                println("l = $i")
+
+                out.add(item.key)
+                i--
+                return@forEach
+            }
+        }
+    }
+    return out.toIntArray()
 }
 
 
 fun main() {
-    println(nthUglyNumber(10))
+    val a = intArrayOf(5, 3, 1, 1, 1, 3, 73, 1)
+    val k = 2
+    topKFrequent(a, k).forEach {
+        println(it)
+    }
 }
