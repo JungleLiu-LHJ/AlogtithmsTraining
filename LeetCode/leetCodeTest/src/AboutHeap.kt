@@ -35,7 +35,7 @@ fun nthUglyNumber(n: Int): Int {
             }
         }
 
-        if(list[list.size - 1] != out) {
+        if (list[list.size - 1] != out) {
             list.add(out)
             i++
             println(out)
@@ -43,7 +43,7 @@ fun nthUglyNumber(n: Int): Int {
 
     }
 
-    return list[n-1]
+    return list[n - 1]
 }
 
 /**
@@ -59,6 +59,22 @@ fun isUglyNumber(n: Int): Boolean {
 }
 
 
-fun main(){
+/**
+ * 347. 前 K 个高频元素
+ * 给定一个非空的整数数组，返回其中出现频率前 k 高的元素。
+ */
+fun topKFrequent(nums: IntArray, k: Int): IntArray {
+    val map = HashMap<Int, Int>()
+    nums.forEach { num ->
+        if (map.containsKey(num)) {
+            map[num] = map[num]!!.plus(1)
+        } else {
+            map[num] = 1
+        }
+    }
+}
+
+
+fun main() {
     println(nthUglyNumber(10))
 }
