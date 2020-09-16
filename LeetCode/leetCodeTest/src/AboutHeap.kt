@@ -83,7 +83,7 @@ fun topKFrequent(nums: IntArray, k: Int): IntArray {
     makeHeap(times)
     for (index in 1..k) {
         if (index > (l - 2)) break
-        siftDown(nums, 0, index)
+        siftDown(times, 0, index)
         val temp = times[l - index]
         times[l - index] = times[0]
         times[0] = temp
@@ -91,26 +91,28 @@ fun topKFrequent(nums: IntArray, k: Int): IntArray {
 
     val out = hashSetOf<Int>()
     i = k
-    for (index in 1..k) {
+
+    for (index in 1..k)  {
         map.forEach { item ->
             println("${l - index} : ${times[l - index]} and ${item.value}")
             if (times[l - index] == item.value) {
-
                 println("l = $i")
+                if(i>0){
+                    out.add(item.key)
+                    map[item.key]= 0
+                    i--
+                }
 
-                out.add(item.key)
-                i--
-                return@forEach
             }
         }
     }
     return out.toIntArray()
 }
-
+/************未完成*********************************/
 
 fun main() {
-    val a = intArrayOf(5, 3, 1, 1, 1, 3, 73, 1)
-    val k = 2
+    val a = intArrayOf(3,2,3,1,2,4,5,5,6,7,7,8,2,3,1,1,1,10,11,5,6,2,4,7,8,5,6)
+    val k = 10
     topKFrequent(a, k).forEach {
         println(it)
     }
