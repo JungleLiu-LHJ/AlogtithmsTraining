@@ -20,7 +20,7 @@ fun waysToChange(n: Int): Int {
 }
 
 /**
- * 爬楼梯
+ * 70.爬楼梯
  */
 fun climbStairs(n: Int): Int {
     var times = IntArray(n + 1)
@@ -65,8 +65,8 @@ fun maxSubArray(nums: IntArray): Int {
 fun maxProfit(prices: IntArray): Int {
     var max = 0
     var min = 0
-    if(prices.isNotEmpty()) {
-       min = prices[0]
+    if (prices.isNotEmpty()) {
+        min = prices[0]
     }
     prices.indices.forEach {
         if (prices[it] > min) {
@@ -78,6 +78,91 @@ fun maxProfit(prices: IntArray): Int {
     return max
 }
 
+/**
+ * 198. 打家劫舍
+ * 你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额
+ */
+fun rob(nums: IntArray): Int {
+    val l = nums.size
+    if (l == 0) {
+        return 0
+    } else if (l == 1) {
+        return nums[0]
+    }
+    nums.indices.forEach {
+        if (it > 2) {
+            nums[it] = nums[it] + kotlin.math.max(nums[it - 2], nums[it - 3])
+        } else if (it == 2) {
+            nums[it] = nums[2] + nums[0]
+        }
+    }
+    return kotlin.math.max(nums[l - 2], nums[l - 1])
+}
+
+/**
+ * 746. 使用最小花费爬楼梯
+ * 数组的每个索引作为一个阶梯，第 i个阶梯对应着一个非负数的体力花费值 cost[i](索引从0开始)。
+ * 每当你爬上一个阶梯你都要花费对应的体力花费值，然后你可以选择继续爬一个阶梯或者爬两个阶梯。
+ * 您需要找到达到楼层顶部的最低花费。在开始时，你可以选择从索引为 0 或 1 的元素作为初始阶梯。
+ */
+fun minCostClimbingStairs(cost: IntArray): Int {
+    val l = cost.size
+    if (l < 2 || l > 1000) {
+        return 0
+    }
+
+    cost.indices.forEach {
+        if (it > 1) {
+            cost[it] = cost[it] + if (cost[it - 1] > cost[it - 2]) cost[it - 2] else cost[it - 1]
+        }
+    }
+    return if (cost[l - 1] > cost[l - 2]) cost[l - 2] else cost[l - 1]
+}
+
+/**
+ * 面试题 08.01. 三步问题
+ * 三步问题。有个小孩正在上楼梯，楼梯有n阶台阶，小孩一次可以上1阶、2阶或3阶。实现一种方法，计算小孩有多少种上楼梯的方式。结果可能很大，你需要对结果模1000000007
+ *
+ */
+fun waysToStep(n: Int): Int {
+    val times = IntArray(n + 1)
+    times[0] = 1
+    times.indices.forEach {
+        for (steps in 1..3) {
+            if (it - steps >= 0) {
+                times[it] = (times[it - steps] + times[it]) % 1000000007
+            }
+        }
+    }
+    return times[n]
+}
+
+/**
+ * 338. 比特位计数
+ * 给定一个非负整数 num。对于 0 ≤ i ≤ num 范围中的每个数字 i ，计算其二进制数中的 1 的数目并将它们作为数组返回.
+ */
+fun countBits(num: Int): IntArray {
+    var nums = IntArray(num + 1)
+    nums[0] = 0
+    var binary = 2
+    for (index in 1..num) {
+        val temp = index % binary
+        when (temp) {
+            0 -> {
+                binary = index
+                nums[index] = 1
+            }
+            else -> {
+                nums[index] = nums[temp] + 1
+            }
+        }
+    }
+    return nums
+}
+
 fun main() {
-    println(waysToChange(10))
+    countBits(6).forEach {
+        print("$it ,")
+    }
 }
