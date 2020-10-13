@@ -1,6 +1,7 @@
 import java.util.*
 import kotlin.math.min
 
+
 /**
  * 20. 有效的括号
  * 给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串，判断字符串是否有效。
@@ -203,6 +204,88 @@ fun simplifyPath(path: String): String {
     return a.reverse().toString()
 }
 
+/**
+ * 剑指 Offer 09. 用两个栈实现队列
+ *
+ * 用两个栈实现一个队列。队列的声明如下，请实现它的两个函数 appendTail 和 deleteHead ，分别完成在队列尾部插入整数和在队列头部删除整数的功能。(若队列中没有元素，deleteHead 操作返回 -1
+ */
+
+class CQueue() {
+    var stack1 = Stack<Int>()
+    var stack2 = Stack<Int>()
+
+    fun appendTail(value: Int) {
+        stack1.push(value)
+    }
+
+    fun deleteHead(): Int {
+        if(stack2.isEmpty()) {
+            while (stack1.isNotEmpty()) {
+                stack2.push(stack1.pop())
+            }
+        }
+        return if (stack2.isNotEmpty()) stack2.pop() else -1
+    }
+}
+
+
+/**
+ * 剑指 Offer 30. 包含min函数的栈
+ * 定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的 min 函数在该栈中，调用 min、push 及 pop 的时间复杂度都是 O(1)
+ *
+ */
+class MinStack() {
+
+    /** initialize your data structure here. */
+    private val minValue = Stack<Int>()
+
+    private val stack = Stack<Int>()
+
+    fun push(x: Int) {
+        val min = if(minValue.isNotEmpty()) minValue.peek() else Int.MAX_VALUE
+        if(min >= x){
+            minValue.push(x)
+        }
+        stack.push(x)
+    }
+
+    fun pop() {
+        if(stack.pop() == minValue.peek()) {
+            minValue.pop()
+        }
+    }
+
+    fun top(): Int {
+        return stack.peek()
+    }
+
+    fun min(): Int {
+        return minValue.peek()
+    }
+
+}
+
+/**
+ * 剑指 Offer 59 - II. 队列的最大值
+ * 请定义一个队列并实现函数 max_value 得到队列里的最大值，要求函数max_value、push_back 和 pop_front 的均摊时间复杂度都是O(1)。
+ */
+class MaxQueue() {
+    var queue = LinkedList<Int>()
+
+
+    fun max_value(): Int {
+
+    }
+
+    fun push_back(value: Int) {
+        queue.push(value)
+    }
+
+    fun pop_front(): Int {
+ 
+    }
+
+}
 
 fun main() {
     println(simplifyPath("/a/../../b/../c//.//"))
