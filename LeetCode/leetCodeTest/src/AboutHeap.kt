@@ -1,3 +1,113 @@
+import java.util.*
+import kotlin.collections.HashMap
+
+/**
+ * 最小的k个数
+ * 输入整数数组 arr ，找出其中最小的 k 个数。例如，输入4、5、1、6、2、7、3、8这8个数字，则最小的4个数字是1、2、3、4。
+ */
+class Solution {
+    fun getLeastNumbers(arr: IntArray, k: Int): IntArray {
+        val l = arr.size - 1
+        var out = IntArray(k)
+        for(index in l downTo 0) {
+            siftUp(arr,start = index)
+        }
+//        arr.forEach {
+//            print("$it ,")
+//        }
+
+        for(index in 0 until  k) {
+            siftUp(arr,num = index)
+            out[index] = arr[0]
+            val temp = arr[l - index]
+            arr[l - index] = arr[0]
+            arr[0] = temp
+
+
+        }
+        return out
+
+    }
+
+    fun siftUp(h: IntArray, start: Int = 0, num: Int = 0) {
+        val l = h.size - num
+        var parent = start
+        while (l > (parent * 2 + 1)) {
+            if (parent * 2 + 2 == l) {
+                if (h[parent] > h[parent * 2 + 1]) {
+                    val temp = h[parent]
+                    h[parent] = h[parent * 2 + 1]
+                    h[parent * 2 + 1] = temp
+                }
+            } else if (h[parent] > h[parent * 2 + 1] || h[parent] > h[parent * 2 + 2]) {
+                when (h[parent * 2 + 1] <= h[parent * 2 + 2]) {
+                    true -> {
+                        val temp = h[parent]
+                        h[parent] = h[parent * 2 + 1]
+                        h[parent * 2 + 1] = temp
+                    }
+                    false -> {
+                        val temp = h[parent]
+                        h[parent] = h[parent * 2 + 2]
+                        h[parent * 2 + 2] = temp
+                    }
+                }
+            }
+            parent += 1
+        }
+    }
+}
+
+fun main() {
+    val a = intArrayOf(3,2,1)
+    val k = 2
+    Solution().getLeastNumbers(a, k).forEach {
+        println(it)
+    }
+
+}
+
+/**
+ * 剑指 Offer 41. 数据流中的中位数
+ * 如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。
+ *
+ */
+
+class MedianFinder() {
+
+    /** initialize your data structure here. */
+    private val maxQueue = PriorityQueue<Int> { a, b -> if (b - a > 0) 1 else -1 }
+    private val minQueue = PriorityQueue<Int> { a, b -> if (a - b > 0) 1 else -1 }
+
+    fun addNum(num: Int) {
+        when {
+            maxQueue.isEmpty() -> {
+                maxQueue.offer(num)
+            }
+            num > maxQueue.peek() -> {
+                minQueue.offer(num)
+            }
+            else -> {
+                maxQueue.offer(num)
+            }
+        }
+        while (maxQueue.size - 1 != minQueue.size && maxQueue.size != minQueue.size) {
+            if (minQueue.size < maxQueue.size - 1) {
+                minQueue.offer(maxQueue.poll())
+            } else if (minQueue.size > maxQueue.size) {
+                maxQueue.offer(minQueue.poll())
+            }
+        }
+    }
+
+    fun findMedian(): Double {
+        return if (minQueue.size == maxQueue.size) (minQueue.peek() + maxQueue.peek()).toDouble() / 2 else maxQueue.peek().toDouble()
+
+    }
+
+}
+
+
 /**
  * 264.丑数
  * 编写一个程序，找出第 n 个丑数。
@@ -59,6 +169,9 @@ fun isUglyNumber(n: Int): Boolean {
 }
 
 
+
+
+
 /**
  * 347. 前 K 个高频元素
  * 给定一个非空的整数数组，返回其中出现频率前 k 高的元素。
@@ -110,10 +223,4 @@ fun topKFrequent(nums: IntArray, k: Int): IntArray {
 }
 /************未完成*********************************/
 
-fun main() {
-    val a = intArrayOf(3,2,3,1,2,4,5,5,6,7,7,8,2,3,1,1,1,10,11,5,6,2,4,7,8,5,6)
-    val k = 10
-    topKFrequent(a, k).forEach {
-        println(it)
-    }
-}
+

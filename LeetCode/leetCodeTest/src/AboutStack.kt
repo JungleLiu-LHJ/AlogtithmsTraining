@@ -270,22 +270,33 @@ class MinStack() {
  * 请定义一个队列并实现函数 max_value 得到队列里的最大值，要求函数max_value、push_back 和 pop_front 的均摊时间复杂度都是O(1)。
  */
 class MaxQueue() {
-    var queue = LinkedList<Int>()
 
+    var queue = LinkedList<Int>()
+    var deque = LinkedList<Int>()
 
     fun max_value(): Int {
-
+        if(deque.isEmpty()) return -1
+        return deque.first
     }
 
     fun push_back(value: Int) {
-        queue.push(value)
+        queue.addLast(value)
+        while (deque.isNotEmpty() && value > deque.last) {
+            deque.pollLast()
+        }
+        deque.addLast(value)
     }
 
     fun pop_front(): Int {
- 
+        if(queue.isEmpty()) return -1
+        if (deque.isNotEmpty() && queue.first == deque.first) {
+            deque.pollFirst()
+        }
+        return queue.poll()
     }
 
 }
+
 
 fun main() {
     println(simplifyPath("/a/../../b/../c//.//"))

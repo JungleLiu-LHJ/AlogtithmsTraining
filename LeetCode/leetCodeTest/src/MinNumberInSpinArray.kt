@@ -1,5 +1,3 @@
-
-
 /**
  * 旋转数组中的最小数
  */
@@ -125,19 +123,17 @@ fun makeHeap(h: IntArray) {
 fun findKthLargest(nums: IntArray, k: Int): Int {
     makeHeap(nums)
     val l = nums.size
-    for(index in 1 .. k){
-        siftDown(nums,0,index)
+    for (index in 1..k) {
+        siftDown(nums, 0, index)
         val temp = nums[l - index]
-        nums[l - index ] = nums[0]
+        nums[l - index] = nums[0]
         nums[0] = temp
     }
-    return nums[l-k ]
+    return nums[l - k]
 }
 
 
-
-
 fun main() {
-    val a = intArrayOf(3,2,3,1,2,4,5,5,6)
+    val a = intArrayOf(3, 2, 3, 1, 2, 4, 5, 5, 6)
     println(findKthLargest(a, 4))
 }
