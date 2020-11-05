@@ -1,4 +1,5 @@
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.text.toCharArray as toCharArray1
 
 /**
@@ -6,8 +7,32 @@ import kotlin.text.toCharArray as toCharArray1
  * 输入一个非负整数数组，把数组里所有数字拼接起来排成一个数，打印能拼接出的所有数字中最小的一个。
  *
  **/
+fun minNumber1(nums: IntArray): String {
+    /**
+     * easy way
+     */
+    var queue = PriorityQueue<Int> { val1: Int, val2: Int ->
+        val cha1 = val1.toString()
+        val cha2 = val2.toString()
+        if((cha1+cha2) > (cha2+cha1)) {
+            return@PriorityQueue 1
+        } else {
+            return@PriorityQueue -1
+        }
+    }
 
-fun minNumber(nums: IntArray): String {
+    nums.forEach {
+        queue.add(it)
+    }
+    var a = ""
+    while (queue.isNotEmpty()) {
+        a += queue.poll()
+    }
+    return a
+}
+
+
+fun minNumber2(nums: IntArray): String {
     var queue = PriorityQueue<Int> { val1: Int, val2: Int ->
 
         val cha1 = val1.toString().toCharArray1()
@@ -46,6 +71,6 @@ fun minNumber(nums: IntArray): String {
 
 fun main() {
     var a = intArrayOf(3,30,34,5,9)
-    println("${minNumber(a)}")
+    println("${minNumber1(a)}")
 
 }
