@@ -1,3 +1,5 @@
+import com.sun.source.tree.Tree;
+
 import java.util.*;
 
 import static java.lang.Integer.max;
@@ -158,6 +160,39 @@ public class AboutTree {
         if(left == null && right==null) return true;
         if(left == null ||right ==null||left.val!=right.val)return false;
         return recur(left.left,right.right) && recur(left.right , right.left);
+    }
+
+    /**
+     * 剑指 Offer 55 - II. 平衡二叉树
+     * 输入一棵二叉树的根节点，判断该树是不是平衡二叉树。如果某二叉树中任意节点的左右子树的深度相差不超过1，那么它就是一棵平衡二叉树
+     */
+    public boolean isBalanced(TreeNode root) {
+        return reDeep(root) != -1;
+    }
+
+    private int reDeep(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        int left = reDeep(root.left);
+
+        if (left == -1) {
+            return -1;
+        }
+        int right = reDeep(root.right);
+        if (right == -1) {
+            return -1;
+        }
+        return Math.abs(left - right) < 2 ? Math.max(left, right) + 1 : -1;
+
+    }
+
+    /**
+     * 剑指 Offer 07. 重建二叉树
+     * 输入某二叉树的前序遍历和中序遍历的结果，请重建该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
+     */
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+
     }
 
 }
