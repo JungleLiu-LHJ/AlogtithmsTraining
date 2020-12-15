@@ -146,20 +146,20 @@ public class AboutTree {
 
     /**
      * 剑指 Offer 28. 对称的二叉树
-     *请实现一个函数，用来判断一棵二叉树是不是对称的。如果一棵二叉树和它的镜像一样，那么它是对称的。
+     * 请实现一个函数，用来判断一棵二叉树是不是对称的。如果一棵二叉树和它的镜像一样，那么它是对称的。
      *
      * @param root
      * @return
      */
     public boolean isSymmetric(TreeNode root) {
-        if(root==null) return true;
-        return recur(root.left,root.right);
+        if (root == null) return true;
+        return recur(root.left, root.right);
     }
 
-    private boolean recur(TreeNode left,TreeNode right) {
-        if(left == null && right==null) return true;
-        if(left == null ||right ==null||left.val!=right.val)return false;
-        return recur(left.left,right.right) && recur(left.right , right.left);
+    private boolean recur(TreeNode left, TreeNode right) {
+        if (left == null && right == null) return true;
+        if (left == null || right == null || left.val != right.val) return false;
+        return recur(left.left, right.right) && recur(left.right, right.left);
     }
 
     /**
@@ -192,8 +192,39 @@ public class AboutTree {
      * 输入某二叉树的前序遍历和中序遍历的结果，请重建该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
      */
     public TreeNode buildTree(int[] preorder, int[] inorder) {
+        if (preorder == null || inorder == null || preorder.length == 0 || inorder.length == 0) {
+            return null;
+        }
+        if (preorder.length == 1) {
+            return new TreeNode(preorder[0]);
+        }
+        int value = preorder[0];
+        TreeNode node = new TreeNode(value);
+        int[] nums = getIndex(inorder,value);
+        node.left = buildTree(Arrays.copyOfRange(preorder, 1, nums[0] + 1), Arrays.copyOfRange(inorder, 0, nums[0]));
+        node.right = buildTree(Arrays.copyOfRange(preorder, nums[0] + 1, preorder.length), Arrays.copyOfRange(inorder, nums[0] + 1, inorder.length));
 
+        return node;
     }
+
+    private int[] getIndex(int[] order, int num) {
+        int[] out = {0,0};
+        for (int i = 0; i < order.length; i++) {
+            if (order[i] == num) {
+                out[0] = i;
+                break;
+            }
+        }
+        out[1] = order.length - out[0] - 1;
+        return out;
+    }
+
+    public static void main(String[] args) {
+        int[] left = {1,2,3};
+        int[] right = {3,2,1};
+        TreeNode out = new AboutTree().buildTree(left,right);
+    }
+
 
 }
 
