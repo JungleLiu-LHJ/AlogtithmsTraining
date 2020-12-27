@@ -17,11 +17,9 @@ class test {
         var next: ListNode? = null
     }
 
-
-
-
-
 }
+
+
 
 
 fun main() {

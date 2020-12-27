@@ -200,7 +200,7 @@ public class AboutTree {
         }
         int value = preorder[0];
         TreeNode node = new TreeNode(value);
-        int[] nums = getIndex(inorder,value);
+        int[] nums = getIndex(inorder, value);
         node.left = buildTree(Arrays.copyOfRange(preorder, 1, nums[0] + 1), Arrays.copyOfRange(inorder, 0, nums[0]));
         node.right = buildTree(Arrays.copyOfRange(preorder, nums[0] + 1, preorder.length), Arrays.copyOfRange(inorder, nums[0] + 1, inorder.length));
 
@@ -208,7 +208,7 @@ public class AboutTree {
     }
 
     private int[] getIndex(int[] order, int num) {
-        int[] out = {0,0};
+        int[] out = {0, 0};
         for (int i = 0; i < order.length; i++) {
             if (order[i] == num) {
                 out[0] = i;
@@ -219,10 +219,146 @@ public class AboutTree {
         return out;
     }
 
+    HashMap<Integer, Integer> map = new HashMap();
+    int[] preorder;
+
+    public TreeNode buildTree2(int[] preorder, int[] inorder) {
+        if (preorder == null || inorder == null || preorder.length == 0 || inorder.length == 0) {
+            return null;
+        }
+        for (int i = 0; i < inorder.length; i++) {
+            map.put(inorder[i], i);
+        }
+        this.preorder = preorder;
+
+        return recur(0, 0, preorder.length - 1);
+    }
+
+    TreeNode recur(int root, int left, int right) {
+        if (left > right) return null;                          // 递归终止
+        TreeNode node = new TreeNode(preorder[root]);          // 建立根节点
+        int i = map.get(preorder[root]);                       // 划分根节点、左子树、右子树
+        node.left = recur(root + 1, left, i - 1);              // 开启左子树递归
+        node.right = recur(root + i - left + 1, i + 1, right); // 开启右子树递归
+        return node;                                           // 回溯返回根节点
+    }
+
+    /**
+     * 剑指 Offer 32 - I. 从上到下打印二叉树
+     * 从上到下打印出二叉树的每个节点，同一层的节点按照从左到右的顺序打印。(层序遍历)
+     *
+     * @param root
+     * @return
+     */
+
+    public int[] levelOrder2(TreeNode root) {
+        ArrayList<Integer> out = new ArrayList();
+        ;
+        LinkedList<TreeNode> q = new LinkedList<TreeNode>();
+        if (root != null)
+            q.add(root);
+        while (!q.isEmpty()) {
+            int l = q.size();
+            for (int i = 0; i < l; i++) {
+                TreeNode temp = q.poll();
+                out.add(temp.val);
+                if (temp.left != null) q.add(temp.left);
+                if (temp.right != null) q.add(temp.right);
+            }
+        }
+        int[] d = new int[out.size()];
+        for (int i = 0; i < out.size(); i++) {
+            d[i] = (int) out.get(i);
+        }
+        return d;
+    }
+
+    /**
+     * 剑指 Offer 32 - III. 从上到下打印二叉树 III
+     * 请实现一个函数按照之字形顺序打印二叉树，即第一行按照从左到右的顺序打印，第二层按照从右到左的顺序打印，第三行再按照从左到右的顺序打印，其他行以此类推。
+     */
+    public List<List<Integer>> levelOrder3(TreeNode root) {
+        ArrayList<List<Integer>> out = new ArrayList();
+        LinkedList<TreeNode> q = new LinkedList<TreeNode>();
+        if (root != null)
+            q.add(root);
+        Boolean isLeft = false;
+        while (!q.isEmpty()) {
+            int l = q.size();
+            ArrayList<Integer> tempList = new ArrayList<>();
+            for (int i = 0; i < l; i++) {
+                if (isLeft) {
+                    TreeNode temp = q.pollFirst();
+                    tempList.add(temp.val);
+                    if (temp.right != null) q.addLast(temp.right);
+                    if (temp.left != null) q.addLast(temp.left);
+                } else {
+                    TreeNode temp = q.pollLast();
+                    tempList.add(temp.val);
+                    if (temp.left != null) q.addFirst(temp.left);
+                    if (temp.right != null) q.addFirst(temp.right);
+                }
+            }
+            isLeft = !isLeft;
+            out.add(tempList);
+        }
+        return out;
+    }
+
+    /**
+     * 剑指 Offer 34. 二叉树中和为某一值的路径
+     * 输入一棵二叉树和一个整数，打印出二叉树中节点值的和为输入整数的所有路径。从树的根节点开始往下一直到叶节点所经过的节点形成一条路径。
+     */
+    LinkedList<List<Integer>> out = new LinkedList();
+    LinkedList<Integer> path = new LinkedList();
+
+    public List<List<Integer>> pathSum(TreeNode root, int sum) {
+
+        recur(root, sum);
+        return out;
+    }
+
+    private void recur(TreeNode node, int var) {
+        if (node == null) {
+            return;
+        }
+        int d = var - node.val;
+        path.add(node.val);
+        if (d == 0 && node.left == null && node.right == null) {
+            out.add(new LinkedList<>(path));
+        }
+
+        recur(node.left, d);
+        recur(node.right, d);
+        path.pollLast();
+    }
+
+
+    /**
+     * 剑指 Offer 26. 树的子结构
+     * 输入两棵二叉树A和B，判断B是不是A的子结构。(约定空树不是任意一个树的子结构)
+     * <p>
+     * B是A的子结构， 即 A中有出现和B相同的结构和节点值。
+     */
+
+    public boolean isSubStructure(TreeNode A, TreeNode B) {
+        if (B == null || A == null) {
+            return false;
+        }
+        return recurBool(A, B) || isSubStructure(A.left, B) || isSubStructure(A.right, B);
+    }
+
+    private boolean recurBool(TreeNode A, TreeNode B) {
+        if (B == null) return true;
+        if (A == null || B.val != A.val ) return false;
+        return recurBool(A.left, B.left) && recurBool(A.right, B.right);
+    }
+
+
+
+
     public static void main(String[] args) {
-        int[] left = {1,2,3};
-        int[] right = {3,2,1};
-        TreeNode out = new AboutTree().buildTree(left,right);
+
     }
 
 
