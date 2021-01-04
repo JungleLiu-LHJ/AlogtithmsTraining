@@ -253,7 +253,6 @@ public class AboutTree {
 
     public int[] levelOrder2(TreeNode root) {
         ArrayList<Integer> out = new ArrayList();
-        ;
         LinkedList<TreeNode> q = new LinkedList<TreeNode>();
         if (root != null)
             q.add(root);
@@ -350,15 +349,64 @@ public class AboutTree {
 
     private boolean recurBool(TreeNode A, TreeNode B) {
         if (B == null) return true;
-        if (A == null || B.val != A.val ) return false;
+        if (A == null || B.val != A.val) return false;
         return recurBool(A.left, B.left) && recurBool(A.right, B.right);
     }
 
 
+    /**
+     * 剑指 Offer 37. 序列化二叉树
+     * 请实现两个函数，分别用来序列化和反序列化二叉树。
+     */
 
+    public class Codec {
+
+        // Encodes a tree to a single string.
+        public String serialize(TreeNode root) {
+            StringBuilder out = new StringBuilder();
+            out.append("[");
+            LinkedList<TreeNode> q = new LinkedList<TreeNode>();
+            boolean goingOn = true;
+            if (root != null)
+                q.add(root);
+            else {
+                q.add(null);
+                goingOn = false;
+            }
+            while (goingOn) {
+                int l = q.size();
+                goingOn = false;
+                for (int i = 0; i < l; i++) {
+                    TreeNode temp = q.poll();
+                    out.append(temp == null ? "null" : temp.val);
+                    out.append(",");
+                    if (temp.left != null) {
+                        q.add(temp.left);
+                        goingOn = true;
+                    } else {
+                        q.add(null);
+                    }
+                    if (temp.right != null) {
+                        q.add(temp.right);
+                        goingOn = true;
+                    } else {
+                        q.add(null);
+                    }
+                }
+            }
+            return out.toString();
+        }
+
+        // Decodes your encoded data to tree.
+//        public TreeNode deserialize(String data) {
+//
+//        }
+    }
 
     public static void main(String[] args) {
-
+        StringBuilder a = new StringBuilder();
+                a.append(2).append(4).append("null");
+        System.out.println(a.toString());
     }
 
 
