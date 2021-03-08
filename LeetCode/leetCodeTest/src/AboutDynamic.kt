@@ -161,8 +161,66 @@ fun countBits(num: Int): IntArray {
     return nums
 }
 
-fun main() {
-    countBits(6).forEach {
-        print("$it ,")
+
+/**
+ * 剑指 Offer 10- II. 青蛙跳台阶问题
+ * 一只青蛙一次可以跳上1级台阶，也可以跳上2级台阶。求该青蛙跳上一个 n 级的台阶总共有多少种跳法。
+ */
+
+fun numWays(n: Int): Int {
+    val list = IntArray(n + 1)
+    list[0] = 1
+    for (i in 0..n) {
+        if (i + 1 <= n) list[i + 1] = (list[i] + list[i + 1]) % 1000000007
+        if (i + 2 <= n) list[i + 2] = (list[i] + list[i + 2]) % 1000000007
     }
+    return list[n]
+}
+
+
+/**
+ * 斐波那契数列
+ */
+fun fib(n: Int): Int {
+    if (n <= 1) return n
+    if (n == 2) return 1
+
+    var a = 0
+    var b = 1
+    var c = 0
+    for (i in 2..n) {
+        c = a + b
+        a = b
+        b = c
+    }
+    return b
+}
+
+/**
+ * 剑指 Offer 16. 数值的整数次方
+ * 实现函数double Power(double base, int exponent)，求base的exponent次方。不得使用库函数，同时不需要考虑大数问题。
+ */
+fun myPow(x: Double, n: Int): Double {
+    if (x == 0.0) return 0.0
+    if (x == 1.0) return 1.0
+    var x1 = x
+    var l = n.toLong()
+
+    if (l < 0) {
+        l = -l
+        x1 = 1 / x1
+    }
+    var res = 1.toDouble()
+    while (l > 0) {
+        if ((l and 1) == 1L) res *= x1
+        x1 *= x1
+        l = l.shr(1)
+    }
+    return res
+}
+
+
+fun main() {
+    myPow(2.00000,
+            10)
 }
