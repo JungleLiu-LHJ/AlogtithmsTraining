@@ -20,10 +20,10 @@
 
 ### Map
 
-![img](C:\Users\40515\Desktop\面试准备\JAVA梳理\map)
+![img](.\map.png)
 
 - Collection中的集合，元素是孤立存在的（理解为单身），向集合中存储元素采用一个个元素的方式存储。
-- Map中的集合，元素是成对存在的(理解为夫妻)。每个元素由键与值两部分组成，通过键可以找对所对应的值。
+- Map中的集合，元素是成对存在的(理解为夫妻)。每个元素由键与值两部分组成，通过键可以找对所对应的值。 
 - Collection中的集合称为单列集合，Map中的集合称为双列集合。
 - 需要注意的是，Map中的集合不能包含重复的键，值可以重复；每个键只能对应一个值。
 
@@ -42,23 +42,108 @@
 
 hashMap的长度n必须为2^k，因为计算位置的时候需要n-1 = 11...11，如下图所示：
 
-![image-20201104002903666](C:\Users\40515\AppData\Roaming\Typora\typora-user-images\image-20201104002903666.png)
+![image-20201104002903666](.\image-20201104002903666.png)
 
-
+> 其中hashCode是该对象的hash值（每个对象有一个hash值）
 
 #### LinkedHashMap
+
+有序的hashMap，继承自hashMap。其实就是**hashMap + 双向链表**，把每个新增的Entry放到双向链表里面。Android中的LruCache用到了LinkedHashMap，也是线程不安全的。
 
 
 
 #### TreeMap
 
+内部会对key进行排序（key需要重写`Comparable`）。内部是红黑树结构
+
 
 
 #### HashTable
 
+继承自Dictionary。
+
+**线程安全的**，每个方法都加了synchronized。
+
+不可以传空值（HashMap可以传），hash值计算方式和下标（index）计算方式都不一样，因为HashTable的：
+
+![image-20210225232222310](.\image-20210225232222310.png)
+
+HashMap的：
+
+![image-20210225232302768](.\image-20210225232302768.png)
+
+Hashtable的扩容和hashMap不同，
+
 
 
 #### ConcurrentHashMap
+
+##### JDK 1.7
+
+![image-20210228184950972](.\image-20210228184950972.png)
+
+分段锁。每一个Segment有一把锁，其中每个Segment的Entry数量是一样的，每个Segment就像是一个Hashmap，且Segment是继承 ReentrantLock的
+
+添加：通过hash计算放在第几个Segment （通过UNSAFE同步） --->计算在Segment里面的的Index  (不断处理逻辑并且tryLock() )
+
+> Unsafe类相当于是一个java语言中的后门类，**提供了硬件级别的原子操作**，所以在一些并发编程中被大量使用
+
+##### JDK1.8以后
+
+> 1.8中：new的时候传进去的初始大小为initialCapacity，经过tableSizeFor(initialCapacity + (initialCapacity >>> 1) + 1))
+
+```java
+public ConcurrentHashMap(int initialCapacity,
+                         float loadFactor, int concurrencyLevel) {
+    if (!(loadFactor > 0.0f) || initialCapacity < 0 || concurrencyLevel <= 0)
+        throw new IllegalArgumentException();
+    if (initialCapacity < concurrencyLevel)   // Use at least as many bins
+        initialCapacity = concurrencyLevel;   // as estimated threads
+    long size = (long)(1.0 + (long)initialCapacity / loadFactor);
+    int cap = (size >= (long)MAXIMUM_CAPACITY) ?
+        MAXIMUM_CAPACITY : tableSizeFor((int)size);
+    this.sizeCtl = cap;
+}
+```
+
+
+
+添加元素： 
+
+```
+计算hash
+for (Node<K,V>[] tab = table;;) {  //table是hash的数组，成员变量
+
+  	if(tab == null) 
+  	 	通过 cas+自旋 初始化数组, sizeCtl: 初始容量->-1 ->扩容阈值
+ 	 else if(f = tabAt(tab, i = (n - 1) & hash)) == null) 
+  	 	cas+自旋（和外侧的for构成自旋循环）来添加Node
+ 	 else if(正在扩容(hash == -1)) 
+  		帮助扩容
+  	 else {
+  		synchronized (f) {
+  		 if (fh >= 0)  //代表普通的链表结构
+  	 		则循环遍历链表：有则覆盖，没有则在尾部添加
+  		 else if(f is 树结构)
+  	 		添加到红黑树里面
+  		}
+ 	 }
+  	判断是否需要转成树
+	维护集合长度，并判断是否要进行扩容操作
+}
+```
+
+**注意：以上这些构造方法中，都涉及到一个变量`sizeCtl`，这个变量是一个非常重要的变量，而且具有非常丰富的含义，它的值不同，对应的含义也不一样，这里我们先对这个变量不同的值的含义做一下说明，后续源码分析过程中，进一步解释**
+
+`sizeCtl`为0，代表数组未初始化， 且数组的初始容量为16
+
+`sizeCtl`为正数，如果数组未初始化，那么其记录的是数组的初始容量，如果数组已经初始化，那么其记录的是数组的扩容阈值
+
+`sizeCtl`为-1，表示数组正在进行初始化
+
+`sizeCtl`小于0，并且不是-1，表示数组正在扩容， -(1+n)，表示此时有n个线程正在共同完成数组的扩容操作
+
+
 
 
 
@@ -80,8 +165,6 @@ hashMap的长度n必须为2^k，因为计算位置的时候需要n-1 = 11...11�
 2. 实现Runnable类，重写run()，无返回
 3. 实现Callable接口，重写call()，有返回
 4. 通过线程池来创建线程
-
-
 
 实现Callback接口，重写call()：
 
@@ -129,7 +212,9 @@ hashMap的长度n必须为2^k，因为计算位置的时候需要n-1 = 11...11�
 >
 >
 
+### 线程状态
 
+![ThreadState](.\ThreadState.jpg)
 
 
 
@@ -137,9 +222,70 @@ hashMap的长度n必须为2^k，因为计算位置的时候需要n-1 = 11...11�
 
 ### 锁/同步
 
+#### Synchronize的原理（偏向锁到重量级锁）
+
+JAVA对象：对象头、实例数据（属性、方法）、填充对齐字节（为了满足Java对象的大小必须是8bit的倍数）
+
+对象头：1.Mark Word   2. Class Point  (指向了当前对象类型所在方法区的类型数据)
+
+Mark Word:
+
+![image-20210309234526927](.\image-20210309234526927.png)
+
+
+
+> synchronized  被编译后的字节码中会生成 ` monitorenter` ....  ` monitorexit` 指令
+>
+> Monitor(类似监管器)是依赖操作系统的mutex lock来实现的，需要切换操作系统的内核态，用户态操作内核态是比较耗时的。
+
+​    无锁 --->偏向锁--->轻量级锁--->重量级锁       只能升级不能降级
+
+* **无锁**：所有线程都能访问，可以通过CAS方式来实现同步
+
+* **偏向锁**：通过mark Word中的前23个bit保存的线程id来确定是不是同一个线程在操作，如果多个锁在竞争则会升级到轻量级锁
+
+  >
+  >
+  >- （1）访问Mark Word中偏向锁的标识是否设置成1，锁标志位是否为01——确认为可偏向状态。
+  >- （2）如果为可偏向状态，则测试线程ID是否指向当前线程，如果是，进入步骤（5），否则进入步骤（3）。
+  >- （3）如果线程ID并未指向当前线程，则通过CAS操作竞争锁。如果竞争成功，则将Mark Word中线程ID设置为当前线程ID，然后执行（5）；如果竞争失败，执行（4）。
+  >- （4）如果CAS获取偏向锁失败，则表示有竞争（CAS获取偏向锁失败说明至少有过其他线程曾经获得过偏向锁，因为线程不会主动去释放偏向锁）。当到达全局安全点（safepoint）时，会首先暂停拥有偏向锁的线程，然后检查持有偏向锁的线程是否活着（因为可能持有偏向锁的线程已经执行完毕，但是该线程并不会主动去释放偏向锁），如果线程不处于活动状态，则将对象头设置成无锁状态（标志位为“01”），然后重新偏向新的线程；如果线程仍然活着，撤销偏向锁后升级到轻量级锁状态（标志位为“00”），此时轻量级锁由原持有偏向锁的线程持有，继续执行其同步代码，而正在竞争的线程会进入自旋等待获得该轻量级锁。
+  >- （5）执行同步代码。
+  >
+  >偏向锁的释放：偏向锁使用了一种等到竞争出现才释放偏向锁的机制：偏向锁只有遇到其他线程尝试竞争偏向锁时，持有偏向锁的线程才会释放锁，线程不会主动去释放偏向锁。
+
+* **轻量级锁**：当一个线程进入的时候    
+
+  1. 通过cas来获取锁，如果获取到则执行2，没有则自旋
+  2. 会在该线程的虚拟机栈中Lock Record中保存该对象的Mark Word的副本和owner指针
+  3. 对象的mark Word的前30bit会生成一个指针指向线程的Lock Record
+  4. 如果自旋等待的线程超过1个，轻量级锁会升级到重量级锁
+
+> 自旋不用进行系统中断和现场恢复，所以其效率跟高。CPU差不多是CPU在空转
+
+* **重量级锁**：通过Monitor来进行管控
+
+![image-20210310001316927](.\image-20210310001316927.png)
+
+
+
+#### 谈谈CAS
+
+互斥锁（悲观锁）：将资源锁定只供一个线程调用，也叫悲观锁
+
+但是有些时候大部分调用是读操作，或者同步代码块执行的耗时远远小于线程切换的耗时的时候，就不想用悲观锁。就想用CAS（Compare and Swap）
+
+各种不同类型的CPU都提供了CAS的支持。通过调用底层的CAS就可以实现原子化操作。
+
+java中`AtomicInteger`等就是通过cas来进行同步的（也叫乐观锁）
+
 
 
 ### ThreadLock(较难)
+
+
+
+
 
 
 
