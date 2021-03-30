@@ -281,6 +281,137 @@ java中`AtomicInteger`等就是通过cas来进行同步的（也叫乐观锁）
 
 
 
+#### AQS (AbstractQueuedSynchronizer)
+
+用一个双向FIFO队列来保存等待的线程。
+
+1. head节点是拿到锁正在运行的线程
+2. head->next的节点则是在自旋的等待的线程
+3. 后面的线程是挂起中
+
+
+
+其中几个比较重要的点：
+
+* 唤醒的时候执行了release，然后会从尾结点开始搜索，找到最靠前的waitStatus<=0的节点。
+
+> 为什么从后往前搜索？ 因为tryAcquire的时候，node与前一个节点t之间，node的prev指针在cas操作之前已经建立，而t的next指针还未建立。此时若其他线程调用了unpark操作，从头开始找就无法遍历完整的队列，而从后往前找就可以。
+>
+> ``` java
+>    private Node addWaiter(Node mode) {
+>         Node node = new Node(Thread.currentThread(), mode);
+>         // Try the fast path of enq; backup to full enq on failure
+>         Node pred = tail;
+>         if (pred != null) {
+>             node.prev = pred;     
+>             if (compareAndSetTail(pred, node)) {  //原子操作
+>                 pred.next = node;    //非原子操作
+>                 return node;
+>             }
+>         }
+>         enq(node);
+>         return node;
+>     }
+> ```
+
+* 当线程处于等待队列中时无法响应外部的中断请求，只有当线程拿到锁之后再进行中断响应
+
+> ![image-20210317232358771](.\image-20210317232358771.png)
+
+
+
+![acquire实现流程图](http://assets.processon.com/chart_image/602f37927d9c081db9a6d12c.png)
+
+#### Reentrantlock
+
+![image-20210320161449608](.\image-20210320161449608.png)
+
+从lock中可以看到公平锁和非公平锁的区别：
+
+``` java
+   static final class NonfairSync extends Sync {
+
+        /**
+         * Performs lock.  Try immediate barge, backing up to normal
+         * acquire on failure.
+         */
+        final void lock() {
+            if (compareAndSetState(0, 1)) //这里如果state==0就直接插队获取锁
+                setExclusiveOwnerThread(Thread.currentThread());
+            else
+                acquire(1);  //乖乖排队
+        }
+
+        protected final boolean tryAcquire(int acquires) {
+            return nonfairTryAcquire(acquires);
+        }
+    }
+```
+
+
+
+```java
+static final class FairSync extends Sync {
+    private static final long serialVersionUID = -3000897897090466540L;
+
+    final void lock() {
+        acquire(1); 
+    }
+
+    /**
+     * Fair version of tryAcquire.  Don't grant access unless
+     * recursive call or no waiters or is first.
+     */
+    protected final boolean tryAcquire(int acquires) {
+        final Thread current = Thread.currentThread();
+        int c = getState();
+        if (c == 0) {
+            if (!hasQueuedPredecessors() && //没有排在前面的线程，则尝试获取锁
+                compareAndSetState(0, acquires)) {
+                setExclusiveOwnerThread(current);
+                return true;
+            }
+        }
+        else if (current == getExclusiveOwnerThread()) { //已经获取了锁。则累加
+            int nextc = c + acquires; 
+            if (nextc < 0)
+                throw new Error("Maximum lock count exceeded");
+            setState(nextc);
+            return true;
+        }
+        return false;
+    }
+}
+```
+
+
+
+Reetranlock中的`lockInterruptibly()`和`lock()`的区别: `lock()`就是`acuqire()`的调用，如果排队等待中调用了中断该线程不会立即抛出异常，而是存储中断的状态值，拿到锁再抛出。 `lockInterruptibly(）` 则是排队过程中如果被调用了interrupt则会放弃排队直接抛出异常。
+
+> java中断机制
+>
+> ![image-20210320145722634](.\image-20210320145722634.png)
+
+Condition:
+
+![image-20210321132500402](.\image-20210321132500402.png)
+
+
+
+#### CountDownLatch
+
+用到AQS的共享模式来实现的,一个线程唤醒，state就+1,被挂起就-1，等于0的时候就让主任务继续执行
+
+![image-20210323220937108](.\image-20210323220937108.png)
+
+
+
+![image-20210323221203754](.\image-20210323221203754.png)
+
+
+
+
+
 ### ThreadLock(较难)
 
 
