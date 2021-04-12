@@ -412,7 +412,60 @@ Condition:
 
 
 
-### ThreadLock(较难)
+### ThreadLock
+
+这个类提供线程局部变量。这些变量与正常的变量不同，每个线程访问一个(通过它的get或set方法)都有它自己的、独立初始化的变量副本。ThreadLocal实例通常是类中的私有静态字段，希望将状态与线程关联(例如，用户ID或事务ID)。
+
+ThreadLock里面的set,get等都是通过操作当前线程的ThreadLocalMap
+
+每个线程内部有个ThreadLocalMap，ThreadLocalMap里面保存着若干
+
+Entry键值对：
+
+```java
+static class Entry extends WeakReference<ThreadLocal<?>> {
+    /** The value associated with this ThreadLocal. */
+    Object value;
+
+    Entry(ThreadLocal<?> k, Object v) {
+        super(k);
+        value = v;
+    }
+}
+```
+
+ThreadLocalMap的set方法:
+
+```java
+1  private void set(ThreadLocal<?> key, Object value) {
+ 8             Entry[] tab = table;
+ 9             int len = tab.length;
+10             int i = key.threadLocalHashCode & (len-1);// 根据哈希码和数组长度求元素放置的位置，即数组下标
+11             //从i开始往后一直遍历到数组最后一个Entry
+12             for (Entry e = tab[i];
+13                  e != null;
+14                  e = tab[i = nextIndex(i, len)]) {
+15                 ThreadLocal<?> k = e.get();
+16                 //如果key相等，覆盖value
+17                 if (k == key) {
+18                     e.value = value;
+19                     return;
+20                 }
+21                 //如果key为null,用新key、value覆盖，同时清理历史key=null的陈旧数据
+22                 if (k == null) {
+23                     replaceStaleEntry(key, value, i);
+24                     return;
+25                 }
+26             }
+    			//如果key不相等且不为null（没找到同一种类型的ThreadLocal）,则在最后添加一个新的，如下:
+28             tab[i] = new Entry(key, value);
+29             int sz = ++size;          //如果超过阀值，就需要再哈希了
+30             if (!cleanSomeSlots(i, sz) && sz >= threshold)
+31                 rehash();
+32 }
+```
+
+
 
 
 

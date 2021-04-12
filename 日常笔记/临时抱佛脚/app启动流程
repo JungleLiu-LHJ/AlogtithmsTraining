@@ -1,0 +1,22 @@
+冷启动：
+
+1.  Launcher 进程通过binder机制请求AMS（systerm_server进程）启动activity
+
+2. AMS判断是否需要创建进程
+
+3. 配置应用进程信息并通过Socket请求Zygote创建子进程 通过系统进程管理类Process配置应用进程信息，这一步涉及到两个进程，system_server进程和 Zygote进程，通过Socket通信
+
+4. 创建应用进程（启动进程） ZygoteServer接收到AMS的Socket请求，通过ZygoteConnection fork应用进程。fork进程后会返回一个pid，通过判断pid进入到应用进程。Zygote进程在初始化的的时候就创建了Socket并Loop等待AMS的请求
+
+5. 应用进程初始化（进程准备工作，进程Loop） 初始化Binder线程池（通过ZygoteInit），初始化运行时环境（通过RunntimeInit）。通过ActivityThread创建主线程，创建H类，开始Loop循环。并通过Binder向AMS发送绑定Application的请求。
+
+6. 第六步：绑定Application AMS接收到ActivityThread发送的请求后，把Application和进程进程绑定（这就是每个进程只有一个Application的原因）。最后通过Binder机制请求启动Activity。
+
+   
+   
+
+![img](https://user-gold-cdn.xitu.io/2019/9/29/16d7af1544b274da?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+![img](https://user-gold-cdn.xitu.io/2019/9/29/16d7af23962a42cd?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+![img](https://user-gold-cdn.xitu.io/2019/9/29/16d7af2f579f29e1?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
