@@ -475,6 +475,14 @@ ThreadLocalMap的set方法:
 
 ## JVM
 
+![image-20210413235303610](C:\Users\40515\AppData\Roaming\Typora\typora-user-images\image-20210413235303610.png)
+
+
+
+
+
+
+
 ### 内存
 
 
