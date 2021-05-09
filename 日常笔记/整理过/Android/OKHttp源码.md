@@ -1,4 +1,4 @@
-## OKHttp
+##  OKHttp
 
 
 
@@ -6,7 +6,7 @@
 
 ### 关键代码：
 
-   [你是谁](#傻狍子)
+   [你是谁](### 傻狍子)
 
 ```kotlin
 internal fun getResponseWithInterceptorChain(): Response {
@@ -175,12 +175,14 @@ internal fun initExchange(chain: RealInterceptorChain): Exchange {
 findConnection有5个寻找链接：
 
 1. 直接拿上次建立的链接
-2. 从链接池里面找不支持多路复用的链接（HTTP1.1）
-3. 从链接池里寻找可用的链接
+2. 从链接池里面找可用的链接（都是不可做链接合并(connection coalescing )的链接（只有HTTP2支持connection coalescing ））
+3. 从链接池里寻找加了routes的可用的链接（包含链接合并的链接）
 4. 自己建立链接
 5. 建立后再次寻找有无可用的多路复用链接（防止并发）
 
 
+
+> 
 
 ```kotlin
 private fun findConnection(
@@ -325,3 +327,61 @@ private fun findConnection(
 
 
 
+
+
+
+
+##### 判断是否可用：
+
+1. 还接受新的请求、链接请求数量没超限（HTTP数量1，HTTP数量4）
+2. 同样的路线连到同一个主机（一系列参数需要相等）
+
+
+
+```kotlin
+internal fun isEligible(address: Address, routes: List<Route>?): Boolean {
+  // 链接请求数量没超限、还接受新的请求
+  if (calls.size >= allocationLimit || noNewExchanges) return false
+
+  // dns、一些加密配置需要相等、还有端口要相等
+  if (!this.route.address.equalsNonHost(address)) return false
+
+  // 判断host是否相等，不相等下面继续判断
+  if (address.url.host == this.route().address.url.host) {
+    return true // This connection is a perfect match.
+  }
+
+	// host不相等，下面继续判断
+  // 1. This connection must be HTTP/2.
+  if (http2Connection == null) return false
+
+  // 2. The routes must share an IP address. 使用同一个ip
+  if (routes == null || !routeMatchesAny(routes)) return false
+
+  // 3. This connection's server certificate's must cover the new host.  证书也要一样
+  if (address.hostnameVerifier !== OkHostnameVerifier) return false
+  if (!supportsUrl(address.url)) return false
+
+  // 4. Certificate pinning must match the host. certificatePinner
+  try {
+    address.certificatePinner!!.check(address.url.host, handshake()!!.peerCertificates)
+  } catch (_: SSLPeerUnverifiedException) {
+    return false
+  }
+
+  return true // The caller's address can be carried by this connection.
+}
+
+ internal fun equalsNonHost(that: Address): Boolean {
+    return this.dns == that.dns &&
+        this.proxyAuthenticator == that.proxyAuthenticator &&
+        this.protocols == that.protocols &&
+        this.connectionSpecs == that.connectionSpecs &&
+        this.proxySelector == that.proxySelector &&
+        this.proxy == that.proxy &&
+        this.sslSocketFactory == that.sslSocketFactory &&
+        this.hostnameVerifier == that.hostnameVerifier &&
+        this.certificatePinner == that.certificatePinner &&
+        this.url.port == that.url.port
+  }
+```
