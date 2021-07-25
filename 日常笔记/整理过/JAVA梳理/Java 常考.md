@@ -110,7 +110,7 @@ public ConcurrentHashMap(int initialCapacity,
 
 添加元素： 
 
-```
+```java
 计算hash
 for (Node<K,V>[] tab = table;;) {  //table是hash的数组，成员变量
 
@@ -161,66 +161,110 @@ for (Node<K,V>[] tab = table;;) {  //table是hash的数组，成员变量
 
 ### 创建
 
-1. 继承Thread类，重写run()，无返回
-2. 实现Runnable类，重写run()，无返回
-3. 实现Callable接口，重写call()，有返回
-4. 通过线程池来创建线程
+1. Thread和Runnable,两个其实底层是一样的，都调用的Thread.run()方法
+2. ThreadFactory,一个创建Thread的工厂方法
+3. 线程池和Executor
 
-实现Callback接口，重写call()：
+线程池：
 
+```java
+  /**
+     * Creates a new {@code ThreadPoolExecutor} with the given initial
+     * parameters.
+     *
+     * @param corePoolSize the number of threads to keep in the pool, even
+     *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+     * @param maximumPoolSize the maximum number of threads to allow in the
+     *        pool
+     * @param keepAliveTime when the number of threads is greater than
+     *        the core, this is the maximum time that excess idle threads
+     *        will wait for new tasks before terminating.
+     * @param unit the time unit for the {@code keepAliveTime} argument
+     * @param workQueue the queue to use for holding tasks before they are
+     *        executed.  This queue will hold only the {@code Runnable}
+     *        tasks submitted by the {@code execute} method.
+     * @param threadFactory the factory to use when the executor
+     *        creates a new thread
+     * @param handler the handler to use when execution is blocked
+     *        because the thread bounds and queue capacities are reached
+     * @throws IllegalArgumentException if one of the following holds:<br>
+     *         {@code corePoolSize < 0}<br>
+     *         {@code keepAliveTime < 0}<br>
+     *         {@code maximumPoolSize <= 0}<br>
+     *         {@code maximumPoolSize < corePoolSize}
+     * @throws NullPointerException if {@code workQueue}
+     *         or {@code threadFactory} or {@code handler} is null
+     */
+public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue,
+                              ThreadFactory threadFactory,
+                              RejectedExecutionHandler handler) 
+```
+
+>corePoolSize:线程池中线程的默认数，创建线程池的时候就有几个线程。等创建的线程数超过这个数的时候**多出来**的会被回收
+>
+>maximumPoolSize:线程的上限，多出来的会等待
+>
+>keepAliveTime: 时间，等待被回收的时间
+>
+>unit:数字的单位
+>
+>workQueue:
+>
+>threadFactory:
+>
+>handler:
 >
 >
->① 定义MyClass实现Callable接口；Class MyClass implements Callable
->② 重写call(),将执行的代码写入；
->③ 创建FutureTask的对象；FutureTask中定义了run(),run()内部调用了call(),并保存了call()的返回值；FutureTask futuretask = new FutureTask(newMyClass());
->④ 创建Thread的对象；Thread thread = new Thread(futuretask);//传入参数Runnable接口
->⑤ 启动线程;thread.start();[图片]
->⑥ 可通过FutureTask类的get()方法获得线程执行结束后的返回值，即call的返回值。futuretask.get();
->
->```java
->import java.util.concurrent.Callable;
->import java.util.concurrent.ExecutionException;
->import java.util.concurrent.FutureTask;
->
->public class MyThread {
->
->    public static void main(String[] args) throws InterruptedException {
->        FutureTask<Integer> task = new FutureTask<Integer>(new CallableImpl());
->        Thread thread = new Thread(task);
->        thread.start();
->        try {
->            System.out.println("task.get() returns " + task.get());
->        } catch (ExecutionException e) {
->            e.printStackTrace();
->        }
->    }
->}
->
->class CallableImpl implements Callable<Integer> {
->
->    private static Integer value = 0;
->
->    @Override
->    public Integer call() throws Exception {
->        System.out.println("执行call方法之前 value = " + value);
->        value = value.intValue() + 1;
->        System.out.println("执行call方法之后 value = " + value);
->        return value;
->    }
->}
->```
->
->
+
+4. Callable和future
+
+```java
+Callable<String> callable = new Callable<String>() {
+ @Override
+ public String call() {
+ try {
+ Thread.sleep(1500);
+ } catch (InterruptedException e) {
+ e.printStackTrace();
+ }
+ return "Done!";
+ }
+};
+ExecutorService executor =
+Executors.newCachedThreadPool();
+Future<String> future = executor.submit(callable);
+try {
+    if(future.isDone()) String result = future.get(); //可以一直循环判断
+ System.out.println("result: " + result);
+} catch (InterruptedException | ExecutionException e)
+{
+ e.printStackTrace();
+}
+```
+
+
+
+
+
+
 
 ### 线程状态
 
-![ThreadState](.\ThreadState.jpg)
+![ ](.\ThreadState.jpg)
 
-
+为什么Thread.sleep需要try..catch，因为sleep的时候如果外部调用了该线程的interrupt（为了不浪费资源结束线程）会通过让sleep抛出异常来中断sleep。注意：1. 当睡眠中外部调了interrupte线程里面的isInterrupt一直是false   2.Thread.isInterrupt()调用之后会重新置位false,会改状态
 
 
 
 ### 锁/同步
+
+> 乐观并发控制：不太会出现冲突的时候就用乐观并发控制，比如，先不加锁，读的时候不加锁，写的时候比较一下和之前一样不一样，不一样就撤回。就是相信并发情况比较少，就先不加锁，等发生的时候多花点成本去撤回数据就行
+>
+> 悲观锁：相信经常发生并发场景，读的时候就上锁，其他线程不能读  
 
 #### Synchronize的原理（偏向锁到重量级锁）
 
@@ -499,3 +543,4 @@ ThreadLocalMap的set方法:
 
 
 
+ 

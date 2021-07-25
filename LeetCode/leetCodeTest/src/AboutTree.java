@@ -1,8 +1,8 @@
-import com.sun.source.tree.Tree;
 
 import java.util.*;
 
 import static java.lang.Integer.max;
+import static java.lang.Integer.sum;
 
 public class AboutTree {
     public class TreeNode {
@@ -14,6 +14,203 @@ public class AboutTree {
             val = x;
         }
     }
+
+    /****************BST************************/
+
+    /**
+     * 230. 二叉搜索树中第K小的元素
+     * 给定一个二叉搜索树的根节点 root ，和一个整数 k ，请你设计一个算法查找其中第 k 个最小元素（从 1 开始计数）。
+     *
+     * @param root
+     * @param k
+     * @return
+     */
+    private int mK;
+    private int kResult;
+
+    public int kthSmallest(TreeNode root, int k) {
+        if (root == null) return -1;
+
+        mK = k;
+        kthSmallest(root);
+
+        return kResult;
+
+    }
+
+    private void kthSmallest(TreeNode root) {
+        if (root == null) return;
+
+        kthSmallest(root.left);
+
+        mK = mK - 1;
+        if (mK == 0) kResult = root.val;
+        kthSmallest(root.right);
+
+    }
+
+
+    /**
+     * 剑指 Offer 54. 二叉搜索树的第k大节点
+     * 给定一棵二叉搜索树，请找出其中第k大的节点。
+     */
+    int k, value;
+
+    public int kthLargest(TreeNode root, int k) {
+        this.k = k;
+        dfs(root);
+        return value;
+    }
+
+    private void dfs(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+        dfs(root.right);
+        this.k--;
+        if (k == 0) value = root.val;
+        dfs(root.left);
+    }
+
+
+    /**
+     * 538. 把二叉搜索树转换为累加树
+     * 给出二叉 搜索 树的根节点，该树的节点值各不相同，请你将其转换为累加树（Greater Sum Tree），使每个节点 node 的新值等于原树中大于或等于 node.val 的值之和。
+     * <p>
+     * 提醒一下，二叉搜索树满足下列约束条件：
+     * <p>
+     * 节点的左子树仅包含键 小于 节点键的节点。
+     * 节点的右子树仅包含键 大于 节点键的节点。
+     * 左右子树也必须是二叉搜索树。
+     *
+     * @param root
+     * @return
+     */
+    public TreeNode convertBST(TreeNode root) {
+        sumdfs(root.left,0);
+        return root;
+    }
+
+    private int sumdfs(TreeNode node,int val) {
+        if (node == null) return val;
+        int a = sumdfs(node.right,val);
+        node.val = a + node.val;
+        int r = sumdfs(node.left,node.val);
+        return r;
+    }
+
+
+    /**
+     * 剑指 Offer 68 - I. 二叉搜索树的最近公共祖先
+     * 给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先
+     */
+    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        int small = p.val;
+        int big = q.val;
+        if (p.val > q.val) {
+            small = q.val;
+            big = p.val;
+        }
+        if (root.val > small && root.val < big) {
+            return root;
+        } else if (root.val < small) {
+            return lowestCommonAncestor2(root.right, p, q);
+        } else if (root.val > big) {
+            return lowestCommonAncestor2(root.left, p, q);
+        }
+        return root;
+    }
+
+    /**
+     * 98. 验证二叉搜索树
+     * 给定一个二叉树，判断其是否是一个有效的二叉搜索树。
+     * <p>
+     * 假设一个二叉搜索树具有如下特征：
+     * <p>
+     * 节点的左子树只包含小于当前节点的数。
+     * 节点的右子树只包含大于当前节点的数。
+     * 所有左子树和右子树自身必须也是二叉搜索树。
+     *
+     * @param root
+     * @return
+     */
+    public boolean isValidBST(TreeNode root) {
+        return isValidBST(root, null, null);
+
+    }
+
+    private boolean isValidBST(TreeNode root, TreeNode min, TreeNode max) {
+        if (root == null) return true;
+        if (min != null && min.val >= root.val) return false;
+        if (max != null && max.val <= root.val) return false;
+        return isValidBST(root.right, root, max) && isValidBST(root.left, min, root);
+    }
+
+
+    /**
+     * 701. 二叉搜索树中的插入操作
+     * 给定二叉搜索树（BST）的根节点和要插入树中的值，将值插入二叉搜索树。 返回插入后二叉搜索树的根节点。 输入数据 保证 ，新值和原始二叉搜索树中的任意节点值都不同。
+     * <p>
+     * 注意，可能存在多种有效的插入方式，只要树在插入后仍保持为二叉搜索树即可。 你可以返回 任意有效的结果 。
+     *
+     * @param root
+     * @param val
+     * @return
+     */
+    public TreeNode insertIntoBST(TreeNode root, int val) {
+        if (root == null) return new TreeNode(val);
+        if (root.val == val) return root;
+
+        if (val > root.val)
+            root.right = insertIntoBST(root.right, val);
+        else if (val < root.val)
+            root.left = insertIntoBST(root.left, val);
+        return root;
+    }
+
+    /**
+     * 450. 删除二叉搜索树中的节点
+     * 给定一个二叉搜索树的根节点 root 和一个值 key，删除二叉搜索树中的 key 对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。
+     * <p>
+     * 一般来说，删除节点可分为两个步骤：
+     * <p>
+     * 首先找到需要删除的节点；
+     * 如果找到了，删除它。
+     * 说明： 要求算法时间复杂度为 O(h)，h 为树的高度。
+     *
+     * @param root
+     * @param key
+     * @return
+     */
+    public TreeNode deleteNode(TreeNode root, int key) {
+        if (root == null) return root;
+        if (root.val == key) {
+            if (root.right == null) return root.left;
+            if (root.left == null) return root.right;
+
+            root.val = findLeftNode(root.right).val; //找到替换现在节点的值
+            root.right = deleteNode(root.right, root.val); //删除掉替换的那个根节点
+            return root;
+        } else if (root.val > key) {
+            root.left = deleteNode(root.left, key);
+        } else {
+            root.right = deleteNode(root.right, key);
+        }
+
+        return root;
+    }
+
+    private TreeNode findLeftNode(TreeNode node) {
+
+        while (node.left != null) {
+            node = node.left;
+        }
+        return node;
+
+    }
+
+    /************************BST*************************/
+
 
     /**
      * 剑指 Offer 55 - I. 二叉树的深度
@@ -45,26 +242,116 @@ public class AboutTree {
     }
 
     /**
-     * 剑指 Offer 54. 二叉搜索树的第k大节点
-     * 给定一棵二叉搜索树，请找出其中第k大的节点。
+     * 116. 填充每个节点的下一个右侧节点指针
+     * 给定一个 完美二叉树 ，其所有叶子节点都在同一层，每个父节点都有两个子节点。二叉树定义如下：
      */
-    int k, value;
+    class Node {
+        public int val;
+        public Node left;
+        public Node right;
+        public Node next;
 
-    public int kthLargest(TreeNode root, int k) {
-        this.k = k;
-        dfs(root);
-        return value;
-    }
-
-    private void dfs(TreeNode root) {
-        if (root == null) {
-            return;
+        public Node() {
         }
-        dfs(root.right);
-        this.k--;
-        if (k == 0) value = root.val;
-        dfs(root.left);
+
+        public Node(int _val) {
+            val = _val;
+        }
+
+        public Node(int _val, Node _left, Node _right, Node _next) {
+            val = _val;
+            left = _left;
+            right = _right;
+            next = _next;
+        }
     }
+
+    ;
+
+    public Node connect(Node root) {
+
+        if (root == null) return null;
+        connect(root.left, root.right);
+        return root;
+    }
+
+    private void connect(Node left, Node right) {
+        if (left == null) return;
+
+        left.next = right;
+
+        connect(left.left, left.right);
+        connect(left.right, right.left);
+        connect(right.left, right.right);
+
+    }
+
+
+    /**
+     * 114. 二叉树展开为链表
+     * 给你二叉树的根结点 root ，请你将它展开为一个单链表：
+     * <p>
+     * 展开后的单链表应该同样使用 TreeNode ，其中 right 子指针指向链表中下一个结点，而左子指针始终为 null 。
+     * 展开后的单链表应该与二叉树 先序遍历 顺序相同。
+     *
+     * @param root
+     */
+    public void flatten(TreeNode root) {
+        if (root == null) return;
+
+        flatten(root.left);
+        flatten(root.right);
+
+        TreeNode left = root.left;
+        TreeNode right = root.right;
+
+        if (left != null) {
+            root.right = left;
+            root.left = null;
+
+            while (left.right != null) {
+                left = left.right;
+            }
+            left.right = right;
+        }
+
+    }
+
+    /**
+     * 654. 最大二叉树
+     * 给定一个不含重复元素的整数数组 nums 。一个以此数组直接递归构建的 最大二叉树 定义如下：
+     * <p>
+     * 二叉树的根是数组 nums 中的最大元素。
+     * 左子树是通过数组中 最大值左边部分 递归构造出的最大二叉树。
+     * 右子树是通过数组中 最大值右边部分 递归构造出的最大二叉树。
+     * 返回有给定数组 nums 构建的 最大二叉树 。
+     *
+     * @param nums
+     * @return
+     */
+    public TreeNode constructMaximumBinaryTree(int[] nums) {
+        return constructMaximumBinaryTree(nums, 0, nums.length - 1);
+    }
+
+    public TreeNode constructMaximumBinaryTree(int[] nums, int left, int right) {
+        if (left > right) return null;
+
+        int max = 0, maxIndex = left;
+        for (int i = left; i <= right; i++) {
+            if (nums[i] > max) {
+                max = nums[i];
+                maxIndex = i;
+            }
+        }
+
+        TreeNode root = new TreeNode(max);
+
+        root.left = constructMaximumBinaryTree(nums, left, maxIndex - 1);
+        root.right = constructMaximumBinaryTree(nums, maxIndex + 1, right);
+
+        return root;
+    }
+
 
     /**
      * 剑指 Offer 68 - II. 二叉树的最近公共祖先
@@ -97,27 +384,6 @@ public class AboutTree {
             return temp1;
         }
 
-        return root;
-    }
-
-    /**
-     * 剑指 Offer 68 - I. 二叉搜索树的最近公共祖先
-     * 给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先
-     */
-    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
-        int small = p.val;
-        int big = q.val;
-        if (p.val > q.val) {
-            small = q.val;
-            big = p.val;
-        }
-        if (root.val > small && root.val < big) {
-            return root;
-        } else if (root.val < small) {
-            return lowestCommonAncestor2(root.right, p, q);
-        } else if (root.val > big) {
-            return lowestCommonAncestor2(root.left, p, q);
-        }
         return root;
     }
 
@@ -405,7 +671,7 @@ public class AboutTree {
 
     public static void main(String[] args) {
         StringBuilder a = new StringBuilder();
-                a.append(2).append(4).append("null");
+        a.append(2).append(4).append("null");
         System.out.println(a.toString());
     }
 
