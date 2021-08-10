@@ -32,6 +32,22 @@ android MVVM和DataBinding框架不一样的，MVVM是一种架构模式，DataB
 
 > 在常规的开发模式中，数据变化需要更新UI的时候，需要先获取UI控件的引用，然后再更新UI。获取用户的输入和操作也需要通过UI控件的引用。在MVVM中，这些都是通过数据驱动来自动完成的，数据变化后会自动更新UI，UI的改变也能自动反馈到数据层，数据成为主导因素。这样MVVM层在业务逻辑处理中只要关心数据，不需要直接和UI打交道，在业务处理过程中简单方便很多。
 
+为什么ViewModel可以保存状态：
+
+```java
+       getLifecycle().addObserver(new LifecycleEventObserver() {
+            @Override
+            public void onStateChanged(@NonNull LifecycleOwner source,
+                    @NonNull Lifecycle.Event event) {
+                if (event == Lifecycle.Event.ON_DESTROY) {
+                    if (!isChangingConfigurations()) { //这里判断了如果不是状态变更才会清除viewModel
+                        getViewModelStore().clear();
+                    }
+                }
+            }
+        });
+```
+
 
 
 ### View

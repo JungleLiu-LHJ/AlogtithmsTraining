@@ -639,5 +639,59 @@ public final class Recycler {
 
 
 
+### 优化
 
+1. 别在onBind里面频繁new对象或者做耗时计算，如设置onClickListenner，因为onClickListenner是需要new出来的，可以设置为成员变量
+
+2. RecyclerView的缓存
+
+   1. 增加一级缓存的数量
+
+   2. 让RecyclerView进行复用：当多个RecyclerView有相同的item布局结构时，多个RecyclerView共用一个RecycledViewPool可以避免创建ViewHolder的开销，避免GC。RecycledViewPool对象可通过RecyclerView对象获取，也可以自己实现。
+
+      > 1）RecycledViewPool是依据ItemViewType来索引ViewHolder的，必须确保共享的RecyclerView的Adapter是同一个，或view type 是不会冲突的。
+      >
+      > （2）RecycledViewPool可以自主控制需要缓存的ViewHolder数量，每种type的默认容量是5，可通过setMaxRecycledViews来设置大小。mPool.setMaxRecycledViews(itemViewType, number); 但这会增大应用内存开销，所以也需要根据应用具体情况来使用。
+      >
+      > （3）利用此特性一般建议设置layout.setRecycleChildrenOnDetach(true);此属性是用来告诉LayoutManager从RecyclerView分离时，是否要回收所有的item，如果项目中复用RecycledViewPool时，开启该功能会更好的实现复用。其他RecyclerView可以复用这些回收的item。
+
+3. recyclerView.setHasFixedSize(true):当Item的高度如是固定的，设置这个属性为true可以提高性能，尤其是当RecyclerView有条目插入、删除时性能提升更明显：每次绘制item的时候不用再重新计算item的高度
+
+4. 重写onScroll事件：
+
+   1. 当大量图片的时候，滑动暂停后再加载图片：防止图片的大量加载，毕竟图片一直是内存占用大户。
+   2. 对于复杂布局的viewHolder重写onScroll事件，如果用户只是快速滑动，滑动暂停后再加载复杂的布局5
+
+5. RecyclerView的一些关键方法：
+
+   * onViewRecycled()：当 ViewHolder 已经确认被回收，且要放进 RecyclerViewPool 中前，该方法会被回调。移出屏幕的ViewHolder会先进入第一级缓存ViewCache中，当第一级缓存空间已满时，会考虑将一级缓存中已有的ViewHolder移到RecyclerViewPool中去。在这个方法中可以考虑图片回收。 
+   * onViewAttachedFromWindow()： RecyclerView的item进入屏幕时回调
+   * onViewDetachedFromWindow()：RecyclerView的item移出屏幕时回调
+   * onAttachedToRecyclerView() ：当 RecyclerView 调用了 setAdapter() 时会触发，新的 adapter 回调 onAttached。
+   * onDetachedFromRecyclerView()：当 RecyclerView 调用了 setAdapter() 时会触发，旧的 adapter 回调 onDetached
+   * setHasStableIds()／getItemId()：setHasStableIds用来标识每一个itemView是否需要一个唯一标识，当stableId设置为true的时候，每一个itemView数据就有一个唯一标识。getItemId()返回代表这个ViewHolder的唯一标识，如果没有设置stableId唯一性，返回NO_ID=-1。通过setHasStableIds可以使itemView的焦点固定，从而解决RecyclerView的notify方法使得图片加载时闪烁问题。注意：setHasStableIds()必须在 setAdapter() 方法之前调用，否则会抛异常。
+     
+
+6. 刷新的时候用一些局部刷新的方法：notifyDataSetChanged会触发所有item的detached回调再触发onAttached回调。
+
+   * notifyItemChanged(int position)
+   * notifyItemInserted(int position)
+   * notifyItemRemoved(int position)
+   * notifyItemMoved(int fromPosition, int toPosition) 
+   * notifyItemRangeChanged(int positionStart, int itemCount)
+   * notifyItemRangeInserted(int positionStart, int itemCount) 
+   * notifyItemRangeRemoved(int positionStart, int itemCount) 
+   * 如果必须用 notifyDataSetChanged()，那么最好设置 mAdapter.setHasStableIds(true)
+
+   
+
+   
+
+   
+
+   
+
+   
+
+   
 

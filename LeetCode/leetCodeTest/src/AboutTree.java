@@ -1,8 +1,6 @@
-
 import java.util.*;
 
 import static java.lang.Integer.max;
-import static java.lang.Integer.sum;
 
 public class AboutTree {
     public class TreeNode {
@@ -87,15 +85,15 @@ public class AboutTree {
      * @return
      */
     public TreeNode convertBST(TreeNode root) {
-        sumdfs(root.left,0);
+        sumdfs(root.left, 0);
         return root;
     }
 
-    private int sumdfs(TreeNode node,int val) {
+    private int sumdfs(TreeNode node, int val) {
         if (node == null) return val;
-        int a = sumdfs(node.right,val);
+        int a = sumdfs(node.right, val);
         node.val = a + node.val;
-        int r = sumdfs(node.left,node.val);
+        int r = sumdfs(node.left, node.val);
         return r;
     }
 
@@ -209,7 +207,145 @@ public class AboutTree {
 
     }
 
+    /**
+     * 剑指 Offer 33. 二叉搜索树的后序遍历序列
+     * 输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果。如果是则返回 true，否则返回 false。假设输入的数组的任意两个数字都互不相同。
+     *
+     * @param postorder
+     * @return
+     */
+    public boolean verifyPostorder(int[] postorder) {
+        return verifyReverse(postorder, 0, postorder.length);
+
+    }
+
+    private boolean verifyReverse(int[] postorder, int left, int right) {
+        int mid = left;
+        if (left >= right) return true;
+        int root = postorder[right - 1];
+        for (int i = left; i < right; i++) {
+            if (postorder[i] < root) {
+                mid++;
+            } else if (postorder[i] > root) {
+                mid = i;
+                break;
+            }
+        }
+
+        for (int i = mid + 1; i < right - 1; i++) {
+            if (postorder[i] < root) {
+                return false;
+            }
+        }
+        boolean a = verifyReverse(postorder, left, mid);
+        boolean b = verifyReverse(postorder, mid, right - 1);
+        return a && b;
+    }
+
+
+    /**
+     * 剑指 Offer 36. 二叉搜索树与双向链表
+     * 输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的循环双向链表。要求不能创建任何新的节点，只能调整树中节点指针的指向。
+     *
+     * @param root
+     * @return
+     */
+
+
+    public Node treeToDoublyList(Node root) {
+        if (root == null) {
+            return null;
+        }
+
+        treeToDoublyListReverse(root.left);
+
+        head.left = pre;
+        pre.right = head;
+
+        return head;
+
+    }
+
+    private Node pre;
+    private Node head;
+
+    private void treeToDoublyListReverse(Node root) {
+        if (root == null) {
+            return;
+        }
+
+        treeToDoublyListReverse(root.left);
+        if(pre != null) pre.right = root;
+        else {
+            head = root;
+        }
+        root.left = pre;
+        pre = root;
+
+        treeToDoublyListReverse(root.right);
+    }
+
+
     /************************BST*************************/
+
+
+    /**
+     * 剑指 Offer 37. 序列化二叉树
+     * 请实现两个函数，分别用来序列化和反序列化二叉树。
+     *
+     * @param root
+     * @return
+     */
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        if (root == null) return "";
+        StringBuilder result = new StringBuilder();
+        serialize2(root, result);
+        result.deleteCharAt(result.length() - 1);
+        System.out.println(result);
+        return result.toString();
+
+    }
+
+    public void serialize2(TreeNode root, StringBuilder result) {
+        if (root == null) {
+            result.append("null").append(",");
+            return;
+        }
+        result.append(root.val).append(",");
+        serialize2(root.left, result);
+        serialize2(root.right, result);
+    }
+
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+
+        if (data.isEmpty()) {
+            return null;
+        }
+        String[] s = data.split(",");
+        LinkedList<String> list = new LinkedList<>();
+        for (int i = 0; i < s.length; i++) {
+            list.add(s[i]);
+        }
+        return deserialize(list);
+    }
+
+    public TreeNode deserialize(LinkedList<String> list) {
+        if (list.peekFirst().equals("null") || list.peekFirst().isEmpty()) {
+            list.pollFirst();
+            return null;
+        }
+        TreeNode node = new TreeNode(Integer.parseInt(list.pollFirst()));
+
+        node.left = deserialize(list);
+        node.right = deserialize(list);
+
+        return node;
+
+    }
 
 
     /**
@@ -670,9 +806,8 @@ public class AboutTree {
     }
 
     public static void main(String[] args) {
-        StringBuilder a = new StringBuilder();
-        a.append(2).append(4).append("null");
-        System.out.println(a.toString());
+        boolean a = (new AboutTree()).verifyPostorder(new int[]{4, 8, 6, 12, 16, 14, 10});
+        System.out.println(a);
     }
 
 
