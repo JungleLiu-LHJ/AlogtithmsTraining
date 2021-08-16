@@ -103,17 +103,9 @@ public class AboutTree {
      * 给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先
      */
     public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
-        int small = p.val;
-        int big = q.val;
-        if (p.val > q.val) {
-            small = q.val;
-            big = p.val;
-        }
-        if (root.val > small && root.val < big) {
-            return root;
-        } else if (root.val < small) {
+        if (root.val < p.val && root.val < q.val) {
             return lowestCommonAncestor2(root.right, p, q);
-        } else if (root.val > big) {
+        } else if (root.val > p.val && root.val > q.val) {
             return lowestCommonAncestor2(root.left, p, q);
         }
         return root;
@@ -275,7 +267,7 @@ public class AboutTree {
         }
 
         treeToDoublyListReverse(root.left);
-        if(pre != null) pre.right = root;
+        if (pre != null) pre.right = root;
         else {
             head = root;
         }
