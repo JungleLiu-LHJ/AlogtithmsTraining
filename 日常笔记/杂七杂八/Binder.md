@@ -18,8 +18,6 @@
 
 
 
-
-
 **内存映射**
 
 Binder IPC 机制中涉及到的内存映射通过 mmap() 来实现，mmap() 是操作系统中一种内存映射的方法。内存映射简单的讲就是将用户空间的一块内存区域映射到内核空间。映射关系建立后，用户对这块内存区域的修改可以直接反应到内核空间；反之内核空间对这段区域的修改也能直接反应到用户空间。
@@ -49,4 +47,21 @@ ServiceManager有自己的binder实体（由Binder驱动创建，第一个binder
 
 
 ### Binder 通信过程
+
+1. 首先，一个进程使用 BINDER*SET*CONTEXT_MGR 命令通过 Binder 驱动将自己注册成为 ServiceManager；
+2. Server 通过驱动向 ServiceManager 中注册 Binder（Server 中的 Binder 实体），表明可以对外提供服务。驱动为这个 Binder 创建位于内核中的实体节点以及 ServiceManager 对实体的引用，将名字以及新建的引用打包传给 ServiceManager，ServiceManger 将其填入查找表。
+3. Client 通过名字，在 Binder 驱动的帮助下从 ServiceManager 中获取到对 Binder 实体的引用，通过这个引用就能实现和 Server 进程的通信。
+
+![preview](https://pic4.zhimg.com/v2-67854cdf14d07a6a4acf9d675354e1ff_r.jpg)
+
+
+
+
+
+自己写的话，
+
+1. 首先继承IInterface定义一个接口A，用来定义可以实现什么能力
+2. 实现一个Stub抽象类，继承Binder，实现A接口
+   1. 里面的asInterface可以返回一个代理对象
+3. 实现这个代理对象
 

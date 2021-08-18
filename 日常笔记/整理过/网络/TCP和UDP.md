@@ -1,5 +1,17 @@
 # TCP和UDP
 
+### 三次握手
+
+![img](https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwNjA1MTEwNDA1NjY2?x-oss-process=image/format,png)
+
+为什么要三次握手：为了防止已经失效的连接请求报文段突然又传到服务端，因而产生错误
+
+
+
+
+
+
+
 ![image-20210102151910349](.\image-20210102151910349.png)
 
 
