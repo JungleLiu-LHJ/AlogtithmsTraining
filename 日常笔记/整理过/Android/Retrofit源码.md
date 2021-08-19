@@ -90,34 +90,69 @@ public <T> T create(final Class<T> service) {
 >
 > ```java
 > public class ProxyGithubService implements GitHubService{
->     InvocationHandler invocationHandler = new InvocationHandler() {
->         private final Platform platform = Platform.get();
->         private final Object[] emptyArgs = new Object[0];
+>  InvocationHandler invocationHandler = new InvocationHandler() {
+>      private final Platform platform = Platform.get();
+>      private final Object[] emptyArgs = new Object[0];
 > 
->         @Override public @Nullable Object invoke(Object proxy, Method method,
->                                                  @Nullable Object[] args) throws Throwable {
->             // If the method is a method from Object then defer to normal invocation.
->             if (method.getDeclaringClass() == Object.class) {
->                 return method.invoke(this, args);
->             }
->             if (platform.isDefaultMethod(method)) {
->                 return platform.invokeDefaultMethod(method, service, proxy, args);
->             }
->             return loadServiceMethod(method).invoke(args != null ? args : emptyArgs);
->         }
->     };
+>      @Override public @Nullable Object invoke(Object proxy, Method method,
+>                                               @Nullable Object[] args) throws Throwable {
+>          // If the method is a method from Object then defer to normal invocation.
+>          if (method.getDeclaringClass() == Object.class) {
+>              return method.invoke(this, args);
+>          }
+>          if (platform.isDefaultMethod(method)) {
+>              return platform.invokeDefaultMethod(method, service, proxy, args);
+>          }
+>          return loadServiceMethod(method).invoke(args != null ? args : emptyArgs);
+>      }
+>  };
 > 
 > 
->     @NotNull
->     @Override
->     public Call<List<Repo>> listRepos(@Nullable String user) {
->         Method method = GitHubService.class.getDeclaredMethod("listRepos",String.class);
->         return invocationHandler.invoke(this,method,user);
->     }
+>  @NotNull
+>  @Override
+>  public Call<List<Repo>> listRepos(@Nullable String user) {
+>      Method method = GitHubService.class.getDeclaredMethod("listRepos",String.class);
+>      return invocationHandler.invoke(this,method,user);
+>  }
 > }
 > ```
 >
 > 
+>
+> 再详细一点来说：我们仍然先定义了接口`Hello`，但是我们并不去编写实现类，而是直接通过JDK提供的一个`Proxy.newProxyInstance()`创建了一个`Hello`接口对象。这种没有实现类但是在运行期动态创建了一个接口对象的方式，我们称为动态代码。JDK提供的动态创建接口对象的方式，就叫动态代理。比如下面这样：
+>
+> ```java
+> public class Main {
+>     public static void main(String[] args) {
+>         InvocationHandler handler = new InvocationHandler() {
+>             @Override
+>             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+>                 System.out.println(method);
+>                 if (method.getName().equals("morning")) {
+>                     System.out.println("Good morning, " + args[0]);//该方法需要实现的功能	
+>                 }
+>                 return null;
+>             }
+>         };
+>         
+>         Hello hello = (Hello) Proxy.newProxyInstance(
+>             Hello.class.getClassLoader(), // 传入ClassLoader
+>             new Class[] { Hello.class }, // 传入要实现的接口
+>             handler); // 传入处理调用方法的InvocationHandler
+>         hello.morning("Bob");
+>     }
+> }
+> 
+> interface Hello {
+>     void morning(String name);
+> }
+> ```
+>
+> 
+>
+> 
+
+
 
 
 

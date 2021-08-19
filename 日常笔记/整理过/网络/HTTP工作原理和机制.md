@@ -217,3 +217,8 @@ Http:HyperText Transfer Protocol超文本传输协议
 
 
 HMAC hash-based message authenticate code  通过hash来比对两个数据是否相同
+
+
+
+
+

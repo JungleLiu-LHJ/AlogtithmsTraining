@@ -138,10 +138,10 @@ public void setContentView(int layoutResID) {
 public void handleResumeActivity(IBinder token, boolean finalStateRequest, boolean isForward,
         String reason) {
         ...
-                final ActivityClientRecord r = performResumeActivity(token, finalStateRequest, reason);
+          final ActivityClientRecord r = performResumeActivity(token, finalStateRequest, reason);
         ...
             
-              r.window = r.activity.getWindow(); //获取到PhoneWindow
+            r.window = r.activity.getWindow(); //获取到PhoneWindow
             View decor = r.window.getDecorView();
             decor.setVisibility(View.INVISIBLE);
             ViewManager wm = a.getWindowManager();
@@ -186,7 +186,7 @@ public void handleResumeActivity(IBinder token, boolean finalStateRequest, boole
      	...
            requestLayout();
         ...
-               view.assignParent(this); //把view的parent设置为ViewRootImpl，这里的view就是decorView
+             view.assignParent(this); //把view的parent设置为ViewRootImpl，这里的view就是decorView
         ...
               res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), mTmpFrame,
