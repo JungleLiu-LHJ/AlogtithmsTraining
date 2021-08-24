@@ -266,6 +266,57 @@ try {
 >
 > 悲观锁：相信经常发生并发场景，读的时候就上锁，其他线程不能读  
 
+
+
+#### volatile（无法保证原子性）
+
+当使用violate去申明一个变量时，就等于告诉了虚拟机这个变量极有可能会被某些程序或者线程修改。为了确保这个变量被修改后，应用程序中的其他的线程都可以看到这个改动，虚拟机就必须采用一些特殊的手段，保证这个变量的可见性等特点。
+
+![img](https://img-blog.csdn.net/20170311100744354?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvaXRfZHg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+
+比如两个线程进行x++的操作的时候，会出现问题。因为x++不是原子性操作，x++ : temp = x +1; x = temp
+
+``` java
+x++ 相当于：
+temp = x +1;  //1
+x = temp;     //2    
+```
+
+假设x=2,线程A,B同时执行++,此时就可能出现，线程A执行了1，temp = 2+1，此时发生了线程切换，然后B线程中，temp = 2+1，x = temp = 3。然后又切换到A线程,x=3。这样就出现了同步问题。
+
+>关于双重锁单例模式为什么要用violate
+>
+>```java
+>class Singleton{
+>
+>    private volatile static Singleton singleton;
+>
+>    private Singleton(){}       
+>    public static Singleton getInstance(){       
+>        if(singleton == null){                  // 1
+>            synchronized(Singleton.class){      // 2
+>                if(singleton == null){          // 3
+>                    singleton = new Singleton(); // 4
+>                }
+>            }
+>        } 
+>        return singleton;           
+>    }
+>
+>}
+>
+>```
+>
+>关于3：线程A和线程B都判断了1了，进入2，线程A先进入临界区，线程B发现线程A进入了临界区，就挂在了`Singleton.class`等等待队列中，等待线程A执行完成。线程A继续执行，创建了一个`singleton`实例。退出了临界区。然后线程B被唤醒，进入临界区，又创建了一个`singleton`实例。结果又创建了两个`singleton`实例。
+>
+>这里4为什么需要用violate？
+>
+>要理解为什么要加volatile，首先要理解`new Singleton()`做了什么。new一个对象有几个步骤。1.看class对象是否加载，如果没有就先加载class对象，2.分配内存空间，初始化实例，3.调用构造函数，4.返回地址给引用。而cpu为了优化程序，可能会进行指令重排序，打乱这3，4这几个步骤，导致实例内存还没分配，就被使用了。
+>
+>再用线程A和线程B举例。线程A执行到`new Singleton()`，开始初始化实例对象，由于存在指令重排序，这次new操作，先把引用赋值了，还没有执行构造函数。这时时间片结束了，切换到线程B执行，线程B调用`new Singleton()`方法，发现引用不等于`null`，就直接返回引用地址了，然后线程B执行了一些操作，就可能导致线程B使用了还没有被初始化的变量。
+>
+>
+
 #### Synchronize的原理（偏向锁到重量级锁）
 
 使用：
@@ -569,6 +620,18 @@ ThreadLocalMap的set方法:
 
 
 
+年轻代：Eden区，Survicor区（有S1和S0区），Young GC 的过程是用复制算法
+
+老年代：满了15岁的时候放到Old区，或者大对象直接放到Old区。Old GC会伴随着Young GC。主要用标记-清理算法
+
+1. 把不需要删除的从E区复制到S0区
+2. E+S0幸存下来的对象复制到S2区，如此往复
+3. 上面每次Young GC每个对象年龄会+1，直到满了15岁就直接到old 区中
+
+新的JDK用G1垃圾收集器
+
+
+
 #### 四种引用类型
 
 1. 强引用：正常的引用
@@ -596,7 +659,7 @@ ThreadLocalMap的set方法:
   * 字节码：本地路径下编译生成的.class文件
   * 类加载器：就是classLoader
 * 验证：保证加载进来的字节流符合虚拟机规范。包括文件格式、元数据验证、字节码验证和符号引用验证
-* 准备：为类变量分配内存
+* 准备：为类变量分配内存，为静态变量赋0值
 * 解析：将常量池内的符号引用替換成直接引用的过程
 * 初始化：对类变量初始化，对static修饰的变量或语句进行初始化。如果初始化一个类的时候，其父类尚未初始化，则优先初始化其父类。如果同时包含多个静态变量和静态代码块，则按照自上而下的顺序依次执行
 

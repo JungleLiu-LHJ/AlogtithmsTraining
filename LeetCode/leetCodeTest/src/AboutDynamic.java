@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class AboutDynamic {
 
     /**
@@ -41,15 +43,91 @@ public class AboutDynamic {
         return l[n] % 1000000007;
     }
 
+    /**
+     * 198. 打家劫舍
+     * 你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+     *
+     * 给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+     * @param nums
+     * @return
+     */
+    public int rob(int[] nums) {
+        if(nums.length == 0) return 0;
+        int[] dp = new int[nums.length];
+        dp[0] = nums[0];
+        if(nums.length>1) {
+            dp[1] = Math.max(dp[0],nums[1]);
+        }
+
+        for(int i = 2;i<nums.length;i++) {
+            dp[i] = Math.max(dp[i-1],dp[i-2]+nums[i]);
+        }
+        return dp[nums.length-1];
+    }
+
+    /**
+     * 322. 零钱兑换
+     * 给你一个整数数组 coins ，表示不同面额的硬币；以及一个整数 amount ，表示总金额。
+     * <p>
+     * 计算并返回可以凑成总金额所需的 最少的硬币个数 。如果没有任何一种硬币组合能组成总金额，返回 -1 。
+     * <p>
+     * 你可以认为每种硬币的数量是无限的。
+     *
+     * @param coins
+     * @param amount
+     * @return
+     */
+    public int coinChange(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1);
+        dp[0] = 0;
+        for (int i = 0; i <= amount; i++) {
+            for (int j = 0; j < coins.length; j++) {
+                if (coins[j] < Integer.MAX_VALUE && i + coins[j] <= amount) {
+                    //注意这里integer容易溢出
+                    dp[i + coins[j]] = Math.min(dp[i + coins[j]], dp[i] + 1);
+                }
+            }
+        }
+        return dp[amount] == amount + 1 ? -1 : dp[amount];
+    }
+
+    /**
+     * 518. 零钱兑换 II
+     * 给你一个整数数组 coins 表示不同面额的硬币，另给一个整数 amount 表示总金额。
+     * <p>
+     * 请你计算并返回可以凑成总金额的硬币组合数。如果任何硬币组合都无法凑出总金额，返回 0 。
+     * <p>
+     * 假设每一种面额的硬币有无限个。
+     * <p>
+     * 题目数据保证结果符合 32 位带符号整数。
+     *
+     * @param amount
+     * @param coins
+     * @return
+     */
+    public int change(int amount, int[] coins) {
+        int[] dp = new int[amount + 1];
+        dp[0] = 1;
+        for (int j = 0; j < coins.length; j++) {
+            for (int i = 0; i <= amount; i++) {
+                if (i + coins[j] <= amount) {
+                    dp[i + coins[j]] = dp[i]+ dp[i + coins[j]];
+                }
+            }
+        }
+        return dp[amount];
+    }
 
     /**
      * 剑指 Offer II 095. 最长公共子序列
      * 给定两个字符串 text1 和 text2，返回这两个字符串的最长 公共子序列 的长度。如果不存在 公共子序列 ，返回 0 。
-     *
+     * <p>
      * 一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
-     *
+     * <p>
      * 例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。
      * 两个字符串的 公共子序列 是这两个字符串所共同拥有的子序列。
+     *
      * @param text1
      * @param text2
      * @return
@@ -58,14 +136,14 @@ public class AboutDynamic {
         char[] s1 = text1.toCharArray();
         char[] s2 = text2.toCharArray();
 
-        int[][] dp = new int[s1.length+1][s2.length+1];
+        int[][] dp = new int[s1.length + 1][s2.length + 1];
 
-        for(int i = 1;i<=s1.length;i++) {
-            for(int j = 1;j<=s2.length;j++) {
-                if(s1[i-1] == s2[j-1]) {
-                    dp[i][j] = dp[i-1][j-1] +1;
+        for (int i = 1; i <= s1.length; i++) {
+            for (int j = 1; j <= s2.length; j++) {
+                if (s1[i - 1] == s2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
                 } else {
-                    dp[i][j] = Math.max(dp[i][j-1],dp[i-1][j]);
+                    dp[i][j] = Math.max(dp[i][j - 1], dp[i - 1][j]);
                 }
             }
         }

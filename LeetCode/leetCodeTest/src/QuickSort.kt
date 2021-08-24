@@ -13,14 +13,18 @@ class QuickSort {
             //顺序很重要，要先从右边开始找
             while (sortArray[rightIndexTemp] >= cardinalNum && leftIndexTemp < rightIndexTemp)
                 rightIndexTemp--
-            //再找右边的
+            //再找左边的
             while (sortArray[leftIndexTemp] <= cardinalNum && leftIndexTemp < rightIndexTemp)
                 leftIndexTemp++
             //交换两个数在数组中的位置
             if (leftIndexTemp < rightIndexTemp) {
+                val temp = sortArray[leftIndexTemp]
+                sortArray[leftIndexTemp] = sortArray[rightIndexTemp]
+                sortArray[rightIndexTemp] = temp
+/*
                 sortArray[leftIndexTemp] = sortArray[leftIndexTemp] xor sortArray[rightIndexTemp]
                 sortArray[rightIndexTemp] = sortArray[leftIndexTemp] xor sortArray[rightIndexTemp]
-                sortArray[leftIndexTemp] = sortArray[leftIndexTemp] xor sortArray[rightIndexTemp]
+                sortArray[leftIndexTemp] = sortArray[leftIndexTemp] xor sortArray[rightIndexTemp]*/
             }
         }
         sortArray[leftIndex] = sortArray[leftIndexTemp]
