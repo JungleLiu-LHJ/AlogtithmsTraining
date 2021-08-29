@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Comparator;
 
 public class AboutDynamic {
 
@@ -46,23 +47,24 @@ public class AboutDynamic {
     /**
      * 198. 打家劫舍
      * 你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
-     *
+     * <p>
      * 给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+     *
      * @param nums
      * @return
      */
     public int rob(int[] nums) {
-        if(nums.length == 0) return 0;
+        if (nums.length == 0) return 0;
         int[] dp = new int[nums.length];
         dp[0] = nums[0];
-        if(nums.length>1) {
-            dp[1] = Math.max(dp[0],nums[1]);
+        if (nums.length > 1) {
+            dp[1] = Math.max(dp[0], nums[1]);
         }
 
-        for(int i = 2;i<nums.length;i++) {
-            dp[i] = Math.max(dp[i-1],dp[i-2]+nums[i]);
+        for (int i = 2; i < nums.length; i++) {
+            dp[i] = Math.max(dp[i - 1], dp[i - 2] + nums[i]);
         }
-        return dp[nums.length-1];
+        return dp[nums.length - 1];
     }
 
     /**
@@ -112,7 +114,7 @@ public class AboutDynamic {
         for (int j = 0; j < coins.length; j++) {
             for (int i = 0; i <= amount; i++) {
                 if (i + coins[j] <= amount) {
-                    dp[i + coins[j]] = dp[i]+ dp[i + coins[j]];
+                    dp[i + coins[j]] = dp[i] + dp[i + coins[j]];
                 }
             }
         }
@@ -195,6 +197,75 @@ public class AboutDynamic {
         }
         return s * n;
     }
+
+    /**
+     * 300. 最长递增子序列
+     * 给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。
+     * <p>
+     * 子序列是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列。
+     *
+     * @param nums
+     * @return
+     */
+    public int lengthOfLIS(int[] nums) {
+        if (nums.length == 0) return 0;
+        int[] dp = new int[nums.length];
+
+        Arrays.fill(dp, 1); //注意这里要全部设置为1，最短也是他自己本身
+        int r = 1;
+        for (int i = 1; i < nums.length; i++) {
+            for (int j = 0; j < i; j++) {
+                if (nums[i] > nums[j]) {
+                    dp[i] = Math.max(dp[j] + 1, dp[i]);
+                }
+            }
+            r = Math.max(r, dp[i]);
+        }
+        return r;
+    }
+
+    /**
+     * 54. 俄罗斯套娃信封问题
+     * 给你一个二维整数数组 envelopes ，其中 envelopes[i] = [wi, hi] ，表示第 i 个信封的宽度和高度。
+     * <p>
+     * 当另一个信封的宽度和高度都比这个信封大的时候，这个信封就可以放进另一个信封里，如同俄罗斯套娃一样。
+     * <p>
+     * 请计算 最多能有多少个 信封能组成一组“俄罗斯套娃”信封（即可以把一个信封放到另一个信封里面）。
+     * <p>
+     * 这题诀窍是先按宽度排序，转换成一个一维的问题
+     *
+     * @param envelopes
+     * @return
+     */
+    public int maxEnvelopes(int[][] envelopes) {
+        Arrays.sort(envelopes, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] == o2[0] ? o1[1] - o2[1] : o1[0] - o2[0];
+            }
+        });
+
+        int[] dp = new int[envelopes.length];
+
+        int r = 1;
+        for (int i = 0; i < envelopes.length; i++) {
+            dp[i] = 1; //注意在这里进行了初始化为1，因为每个信封至少可以是一个俄罗斯套娃
+            for (int j = 0; j < i; j++) {
+
+                if (envelopes[i][1] > envelopes[j][1] && envelopes[i][0] > envelopes[j][0]) {//注意这里长和宽都需要大于里面的信封
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+
+            }
+            r = Math.max(dp[i], r);
+
+        }
+        return r;
+    }
+
+
+
+
 
 
     /**
