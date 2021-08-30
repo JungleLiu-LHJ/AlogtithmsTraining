@@ -134,7 +134,7 @@ public class AboutDynamic {
      * @param text2
      * @return
      */
-    public int longestCommonSubsequence(String text1, String text2) {
+    public static int longestCommonSubsequence(String text1, String text2) {
         char[] s1 = text1.toCharArray();
         char[] s2 = text2.toCharArray();
 
@@ -152,6 +152,38 @@ public class AboutDynamic {
 
         return dp[s1.length][s2.length];
 
+    }
+
+    /**
+     * 最长回文子序列
+     * 给你一个字符串 s ，找出其中最长的回文子序列，并返回该序列的长度。
+     * <p>
+     * 子序列定义为：不改变剩余字符顺序的情况下，删除某些字符或者不删除任何字符形成的一个序列
+     *
+     * @param s
+     * @return
+     */
+    public static int longestPalindromeSubseq(String s) {
+        String s2 = new StringBuilder(s).reverse().toString();
+        int[][] dp = new int[s.length() + 1][s2.length() + 1];
+
+        for (int i = 1; i <= s.length(); i++) {
+            for (int j = 1; j <= s2.length(); j++) {
+                if (s.charAt(i - 1) == s2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i][j - 1], dp[i - 1][j]);
+                }
+            }
+        }
+
+        return dp[s.length()][s2.length()];
+
+    }
+
+    public static void main(String[] args) {
+        int a = longestPalindromeSubseq("cbbd");
+        System.out.println(a);
     }
 
     /**
@@ -264,8 +296,44 @@ public class AboutDynamic {
     }
 
 
-
-
+    /**
+     * 416. 分割等和子集
+     * 给你一个 只包含正整数 的 非空 数组 nums 。请你判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。
+     */
+    public boolean canPartition(int[] nums) {
+        int n = nums.length;
+        if (n < 2) {
+            return false;
+        }
+        int sum = 0, maxNum = 0;
+        for (int num : nums) {
+            sum += num;
+            maxNum = Math.max(maxNum, num);
+        }
+        if (sum % 2 != 0) {
+            return false;
+        }
+        int target = sum / 2;
+        if (maxNum > target) {
+            return false;
+        }
+        boolean[][] dp = new boolean[n][target + 1];
+        for (int i = 0; i < n; i++) {
+            dp[i][0] = true;
+        }
+        dp[0][nums[0]] = true;
+        for (int i = 1; i < n; i++) {
+            int num = nums[i];
+            for (int j = 1; j <= target; j++) {
+                if (j >= num) {
+                    dp[i][j] = dp[i - 1][j] | dp[i - 1][j - num];
+                } else {
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+        return dp[n - 1][target];
+    }
 
 
     /**

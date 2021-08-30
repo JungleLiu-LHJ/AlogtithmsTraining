@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class AboutSort {
 
 
@@ -37,14 +39,14 @@ public class AboutSort {
         if (left < len && arr[left] > arr[largest]) {
             largest = left;
         }
-
-        if (right < len && arr[right] > arr[largest]) {
+ {
             largest = right;
         }
+        if (right < len && arr[right] > arr[largest])
 
         if (largest != i) {
             swap(arr, i, largest);
-            heapify(arr, largest, len);
+            heapify(arr, largest, len); //这里是为了交换以后保持下面的堆也是大顶堆
         }
     }
 
@@ -60,15 +62,24 @@ public class AboutSort {
 
         int len = arr.length;
 
-        buildMaxHeap(arr, len);
-
+        for (int i = (int) Math.floor(len / 2f); i >= 0; i--) {
+            heapify(arr, i, len);
+        }
+        System.out.println(Arrays.toString(arr));
         for (int i = len - 1; i > 0; i--) {
             swap(arr, 0, i);
             len--;
-            heapify(arr, 0, len);
+            heapify(arr, 0, len);//交换后保持下面的也是大顶堆，注意这里Len-1了
         }
-
     }
 
+
+    public static void main(String[] args) {
+        int[] arr = new int[]{1,3,4,5,6,2,9};
+
+
+        new AboutSort().sort(arr);
+        System.out.println(Arrays.toString(arr));
+    }
 
 }
